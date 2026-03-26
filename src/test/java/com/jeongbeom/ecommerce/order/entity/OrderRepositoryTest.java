@@ -3,6 +3,7 @@ package com.jeongbeom.ecommerce.order.entity;
 import com.jeongbeom.ecommerce.common.entity.Role;
 import com.jeongbeom.ecommerce.member.entity.Member;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
+import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
