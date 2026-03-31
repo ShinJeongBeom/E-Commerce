@@ -70,6 +70,21 @@ public class OrderService {
 
     //주문 취소
     public void cancelOrder(Long orderId){
+        // 주문 조회
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(()-> new IllegalArgumentException("주문이 존재하지 않습니다."));
+
+        // 주문 상품 조회
+        List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
+
+        // 재고 복구
+        for(OrderItem orderItem : orderItems){
+            Product product = orderItem.getProduct();
+            product.increaseStock(orderItem.getOrderQuantity());
+        }
+
+        // 주문 상태 변경
+        order.changeStatus(OrderStatus.CANCELLED);
 
     }
     //주문한 멤버 Id로 주문 목록 조회
