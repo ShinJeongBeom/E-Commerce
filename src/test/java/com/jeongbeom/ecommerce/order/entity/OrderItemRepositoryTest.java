@@ -32,14 +32,15 @@ public class OrderItemRepositoryTest {
     @Test
     void 주문_상품_테스트(){
         // given
+        //Member 저장
         Member member = memberRepository.save(
                 new Member("orderitemtest@test.com", "1234", "010-1111-2222", Role.USER)
         );
-
+        //product 저장
         Product product = productRepository.save(
                 new Product("키보드", "기계식 키보드", 100000, 10, ProductStatus.ON_SALE)
         );
-
+        //Order 저장
         Order order = orderRepository.save(
                 new Order(
                         member,
@@ -53,19 +54,22 @@ public class OrderItemRepositoryTest {
         );
 
         OrderItem orderItem = new OrderItem(
-                product,
                 order,
+                product,
                 1,
                 100000
         );
 
         // when
+        //OrderItem 저장
         OrderItem savedOrderItem = orderItemRepository.save(orderItem);
 
         // then
+        //OrderItem 조회
         OrderItem foundOrderItem = orderItemRepository.findById(savedOrderItem.getId())
                 .orElseThrow();
 
+        //Product 이름, 주문수량, 주문 가격이 잘 나오는지 확인
         System.out.println(foundOrderItem.getProduct().getName());
         System.out.println(foundOrderItem.getOrderQuantity());
         System.out.println(foundOrderItem.getOrderPrice());

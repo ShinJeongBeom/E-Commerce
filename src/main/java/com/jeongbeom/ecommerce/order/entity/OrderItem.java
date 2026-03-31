@@ -29,10 +29,10 @@ public class OrderItem extends BaseTimeEntity {
     @Column(nullable = false)
     private int orderQuantity;
 
-    public OrderItem(Product product, Order order, int orderPrice, int orderQuantity) {
-        this.product = product;
+    public OrderItem(Order order, Product product, int orderQuantity, int orderPrice) {
         this.order = order;
-        this.orderPrice = orderPrice;
+        this.product = product;
         this.orderQuantity = orderQuantity;
+        this.orderPrice = orderPrice;
     }
 }
