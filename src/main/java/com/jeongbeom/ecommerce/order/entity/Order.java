@@ -49,4 +49,8 @@ public class Order extends BaseTimeEntity {
         this.phone = phone;
         this.address = address;
     }
+
+    public void changeStatus(OrderStatus status) {
+        this.status = status;
+    }
 }
