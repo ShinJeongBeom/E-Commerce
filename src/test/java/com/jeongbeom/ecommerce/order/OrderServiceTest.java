@@ -3,6 +3,7 @@ package com.jeongbeom.ecommerce.order;
 import com.jeongbeom.ecommerce.member.entity.Member;
 import com.jeongbeom.ecommerce.common.entity.Role;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
+import com.jeongbeom.ecommerce.order.dto.OrderCreateRequestDto;
 import com.jeongbeom.ecommerce.order.entity.Order;
 import com.jeongbeom.ecommerce.order.entity.OrderItem;
 import com.jeongbeom.ecommerce.order.entity.OrderStatus;

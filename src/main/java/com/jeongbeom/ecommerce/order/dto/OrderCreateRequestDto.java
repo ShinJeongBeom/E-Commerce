@@ -1,4 +1,4 @@
-package com.jeongbeom.ecommerce.order;
+package com.jeongbeom.ecommerce.order.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
