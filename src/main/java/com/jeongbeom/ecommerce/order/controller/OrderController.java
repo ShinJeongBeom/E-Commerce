@@ -1,6 +1,7 @@
 package com.jeongbeom.ecommerce.order.controller;
 
 import com.jeongbeom.ecommerce.order.dto.OrderCreateRequestDto;
+import com.jeongbeom.ecommerce.order.dto.OrderResponseDto;
 import com.jeongbeom.ecommerce.order.entity.Order;
 import com.jeongbeom.ecommerce.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class OrderController {
 
     // 주문 조회
     @GetMapping("/member/{memberId}")
-    public ResponseEntity<List<Order>> getOrdersByMember(@PathVariable Long memberId) {
+    public ResponseEntity<List<OrderResponseDto>> getOrdersByMember(@PathVariable Long memberId) {
         return ResponseEntity.ok(orderService.getOrdersByMemberId(memberId));
     }
 }
