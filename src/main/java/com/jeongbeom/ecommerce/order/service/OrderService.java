@@ -3,6 +3,7 @@ package com.jeongbeom.ecommerce.order.service;
 import com.jeongbeom.ecommerce.member.entity.Member;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
 import com.jeongbeom.ecommerce.order.dto.OrderCreateRequestDto;
+import com.jeongbeom.ecommerce.order.dto.OrderResponseDto;
 import com.jeongbeom.ecommerce.order.entity.Order;
 import com.jeongbeom.ecommerce.order.entity.OrderItem;
 import com.jeongbeom.ecommerce.order.entity.OrderStatus;
@@ -89,11 +90,13 @@ public class OrderService {
     }
     //주문한 멤버 Id로 주문 목록 조회
     @Transactional(readOnly = true)
-    public List<Order> getOrdersByMemberId(Long memberId){
+    public List<OrderResponseDto> getOrdersByMemberId(Long memberId){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다. "));
 
-        return orderRepository.findByMember(member);
+        return orderRepository.findByMember(member).stream()
+                .map(OrderResponseDto::new)
+                .toList();
     }
 
 }
