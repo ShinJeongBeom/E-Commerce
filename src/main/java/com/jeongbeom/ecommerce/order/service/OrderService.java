@@ -1,6 +1,7 @@
 package com.jeongbeom.ecommerce.order.service;
 
 import com.jeongbeom.ecommerce.member.entity.Member;
+import com.jeongbeom.ecommerce.member.exception.MemberNotFoundException;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
 import com.jeongbeom.ecommerce.order.dto.OrderCreateRequestDto;
 import com.jeongbeom.ecommerce.order.dto.OrderResponseDto;
@@ -9,8 +10,10 @@ import com.jeongbeom.ecommerce.order.entity.OrderItem;
 import com.jeongbeom.ecommerce.order.entity.OrderStatus;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderItemRepository;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
+import com.jeongbeom.ecommerce.order.exception.OrderNotFoundException;
 import com.jeongbeom.ecommerce.product.entity.Product;
 import com.jeongbeom.ecommerce.product.entity.repository.ProductRepository;
+import com.jeongbeom.ecommerce.product.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,10 +35,10 @@ public class OrderService {
 
         //회원 조회
         Member member = memberRepository.findById(orderCreateRequestDto.getMemberId())
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다"));
+                .orElseThrow(MemberNotFoundException::new);
         //상품 조회
         Product product = productRepository.findById(orderCreateRequestDto.getProductId())
-                .orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+                .orElseThrow(ProductNotFoundException::new);
 
         //재고 차감
         product.decreaseStock(orderCreateRequestDto.getQuantity());
@@ -73,7 +76,7 @@ public class OrderService {
     public void cancelOrder(Long orderId){
         // 주문 조회
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(()-> new IllegalArgumentException("주문이 존재하지 않습니다."));
+                .orElseThrow(OrderNotFoundException::new);
 
         // 주문 상품 조회
         List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
@@ -92,7 +95,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<OrderResponseDto> getOrdersByMemberId(Long memberId){
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다. "));
+                .orElseThrow(MemberNotFoundException::new);
 
         return orderRepository.findByMember(member).stream()
                 .map(OrderResponseDto::new)
