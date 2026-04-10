@@ -1,5 +1,6 @@
 package com.jeongbeom.ecommerce.member.entity;
 
+import com.jeongbeom.ecommerce.cart.entity.Cart;
 import com.jeongbeom.ecommerce.common.entity.BaseTimeEntity;
 import com.jeongbeom.ecommerce.common.entity.Role;
 import jakarta.persistence.*;
@@ -27,6 +28,9 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @OneToOne(mappedBy = "member")
+    private Cart cart;
 
     public Member(String email, String password, String phone, Role role) {
         this.email = email;
