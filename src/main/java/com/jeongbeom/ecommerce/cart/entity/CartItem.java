@@ -30,6 +30,20 @@ public class CartItem {
         this.quantity = quantity;
     }
 
+    // 연관관계 설정
+    public void setCart(Cart cart) {
+        this.cart = cart;
+    }
+
+    // 수량 증가
+    public void increaseQuantity(int quantity) {
+        this.quantity += quantity;
+    }
+
+    // 수량 변경
+    public void updateQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 
 
 }
