@@ -2,9 +2,9 @@ package com.jeongbeom.ecommerce.order.controller;
 
 import com.jeongbeom.ecommerce.order.dto.OrderCreateRequestDto;
 import com.jeongbeom.ecommerce.order.dto.OrderResponseDto;
-import com.jeongbeom.ecommerce.order.entity.Order;
 import com.jeongbeom.ecommerce.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,8 +19,10 @@ public class OrderController {
 
     // 주문 생성
     @PostMapping
-    public ResponseEntity<String> createOrder(@RequestBody OrderCreateRequestDto requestDto) {
-        orderService.createOrder(requestDto);
+    public ResponseEntity<String> createOrder(Authentication authentication,
+                                              @RequestBody OrderCreateRequestDto requestDto) {
+        Long memberId = Long.parseLong(authentication.getName());
+        orderService.createOrder(memberId,requestDto);
         return ResponseEntity.ok("주문이 완료되었습니다.");
     }
 
@@ -33,7 +35,8 @@ public class OrderController {
 
     // 주문 조회
     @GetMapping("/member/{memberId}")
-    public ResponseEntity<List<OrderResponseDto>> getOrdersByMember(@PathVariable Long memberId) {
+    public ResponseEntity<List<OrderResponseDto>> getOrdersByMember(Authentication authentication) {
+        Long memberId =  Long.parseLong(authentication.getName());
         return ResponseEntity.ok(orderService.getOrdersByMemberId(memberId));
     }
 }
