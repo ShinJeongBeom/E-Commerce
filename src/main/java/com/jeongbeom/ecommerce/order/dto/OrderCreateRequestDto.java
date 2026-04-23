@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrderCreateRequestDto {
 
-    private Long memberId;
     private Long productId;
     private int quantity;
 
@@ -15,8 +14,7 @@ public class OrderCreateRequestDto {
     private String phone;
     private String address;
 
-    public OrderCreateRequestDto(Long memberId, Long productId, int quantity, String name, String phone, String address) {
-        this.memberId = memberId;
+    public OrderCreateRequestDto(Long productId, int quantity, String name, String phone, String address) {
         this.productId = productId;
         this.quantity = quantity;
         this.name = name;

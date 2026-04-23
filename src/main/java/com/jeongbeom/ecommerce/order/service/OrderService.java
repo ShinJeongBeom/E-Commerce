@@ -31,10 +31,10 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
 
     //주문 생성
-    public void createOrder(OrderCreateRequestDto orderCreateRequestDto){
+    public void createOrder(Long memberId, OrderCreateRequestDto orderCreateRequestDto){
 
         //회원 조회
-        Member member = memberRepository.findById(orderCreateRequestDto.getMemberId())
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
         //상품 조회
         Product product = productRepository.findById(orderCreateRequestDto.getProductId())

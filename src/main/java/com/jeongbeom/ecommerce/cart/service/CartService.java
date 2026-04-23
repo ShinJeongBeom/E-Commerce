@@ -32,10 +32,10 @@ public class CartService {
      * 장바구니 상품 추가
      */
     @Transactional
-    public void addCartItem(AddCartRequestDto addCartRequestDto) {
+    public void addCartItem(Long memberId, AddCartRequestDto addCartRequestDto) {
 
         // 회원 기준으로 장바구니 조회
-        Member member = memberRepository.findById(addCartRequestDto.getMemberId())
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow((MemberNotFoundException::new));
 
         // 상품 조회

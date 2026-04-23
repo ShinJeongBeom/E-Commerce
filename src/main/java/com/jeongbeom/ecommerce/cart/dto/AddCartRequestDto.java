@@ -10,9 +10,6 @@ import lombok.NoArgsConstructor;
 public class AddCartRequestDto {
 
     @NotNull
-    private Long memberId;  // 누구의 장바구니인지 확인
-
-    @NotNull
     private Long productId; // 어떤 상품을 담는지
 
     @Min(1) // 수량 0 방지.
