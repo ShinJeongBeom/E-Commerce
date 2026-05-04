@@ -22,7 +22,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class OrderService {
 
     private final MemberRepository memberRepository;
@@ -31,6 +30,7 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
 
     //주문 생성
+    @Transactional
     public void createOrder(Long memberId, OrderCreateRequestDto orderCreateRequestDto){
 
         //회원 조회
@@ -73,6 +73,7 @@ public class OrderService {
     }
 
     //주문 취소
+    @Transactional
     public void cancelOrder(Long orderId){
         // 주문 조회
         Order order = orderRepository.findById(orderId)

@@ -1,6 +1,8 @@
 package com.jeongbeom.ecommerce.product.entity;
 
 import com.jeongbeom.ecommerce.common.entity.BaseTimeEntity;
+import com.jeongbeom.ecommerce.product.exception.InvalidStockQuantityException;
+import com.jeongbeom.ecommerce.product.exception.NotEnoughStockException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,9 +43,14 @@ public class Product extends BaseTimeEntity {
 
     // 재고 감소
     public void decreaseStock(int quantity){
-        if(stock < quantity){
-            throw new IllegalArgumentException("재고 부족");
+        if (quantity <= 0){
+            throw new InvalidStockQuantityException();
         }
+
+        if (stock < quantity){
+           throw new NotEnoughStockException();
+        }
+
         this.stock -= quantity;
     }
 
