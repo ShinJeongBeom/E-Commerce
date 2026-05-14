@@ -5,8 +5,11 @@ import com.jeongbeom.ecommerce.member.entity.Member;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderItemRepository;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
+import com.jeongbeom.ecommerce.product.entity.CareLevel;
+import com.jeongbeom.ecommerce.product.entity.LightRequirement;
 import com.jeongbeom.ecommerce.product.entity.Product;
 import com.jeongbeom.ecommerce.product.entity.ProductStatus;
+import com.jeongbeom.ecommerce.product.entity.WateringCycle;
 import com.jeongbeom.ecommerce.product.entity.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +41,19 @@ public class OrderItemRepositoryTest {
         );
         //product 저장
         Product product = productRepository.save(
-                new Product("키보드", "기계식 키보드", 100000, 10, ProductStatus.ON_SALE)
+                new Product(
+                        "방울복랑금",
+                        "다육식물",
+                        CareLevel.NORMAL,
+                        LightRequirement.MEDIUM,
+                        WateringCycle.WEEKLY,
+                        "https:111,111",
+                        "화분 포함",
+                        "부분 부분 금색 빛이 도는 식물",
+                        5000,
+                        10,
+                        ProductStatus.ON_SALE
+                )
         );
         //Order 저장
         Order order = orderRepository.save(
