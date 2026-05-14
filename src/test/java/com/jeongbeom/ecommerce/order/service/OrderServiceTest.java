@@ -11,7 +11,10 @@ import com.jeongbeom.ecommerce.order.entity.repository.OrderItemRepository;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
 import com.jeongbeom.ecommerce.order.service.OrderService;
 import com.jeongbeom.ecommerce.product.entity.Product;
+import com.jeongbeom.ecommerce.product.entity.CareLevel;
+import com.jeongbeom.ecommerce.product.entity.LightRequirement;
 import com.jeongbeom.ecommerce.product.entity.ProductStatus;
+import com.jeongbeom.ecommerce.product.entity.WateringCycle;
 import com.jeongbeom.ecommerce.product.entity.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,9 +62,15 @@ class OrderServiceTest {
 
         Product product = productRepository.save(
                 new Product(
-                        "기계식 키보드",
-                        "청축 기계식 키보드",
-                        100000,
+                        "방울복랑금",
+                        "다육식물",
+                        CareLevel.NORMAL,
+                        LightRequirement.MEDIUM,
+                        WateringCycle.WEEKLY,
+                        "https:111,111",
+                        "화분 포함",
+                        "부분 부분 금색 빛이 도는 식물",
+                        5000,
                         10,
                         ProductStatus.ON_SALE
                 )
@@ -91,7 +100,7 @@ class OrderServiceTest {
         Product foundProduct = productRepository.findById(product.getId()).orElseThrow();
 
         assertThat(savedOrder.getMember().getId()).isEqualTo(member.getId());
-        assertThat(savedOrder.getTotalPrice()).isEqualTo(200000);
+        assertThat(savedOrder.getTotalPrice()).isEqualTo(10000);
         assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.CREATED);
         assertThat(savedOrder.getName()).isEqualTo("신정범");
         assertThat(savedOrder.getPhone()).isEqualTo("010-1111-2222");
@@ -100,7 +109,7 @@ class OrderServiceTest {
         assertThat(savedOrderItem.getOrder().getId()).isEqualTo(savedOrder.getId());
         assertThat(savedOrderItem.getProduct().getId()).isEqualTo(product.getId());
         assertThat(savedOrderItem.getOrderQuantity()).isEqualTo(2);
-        assertThat(savedOrderItem.getOrderPrice()).isEqualTo(100000);
+        assertThat(savedOrderItem.getOrderPrice()).isEqualTo(5000);
 
         assertThat(foundProduct.getStock()).isEqualTo(8);
     }
@@ -122,9 +131,15 @@ class OrderServiceTest {
 
         Product product = productRepository.save(
                 new Product(
-                        "마우스",
-                        "무선 마우스",
-                        50000,
+                        "방울복랑금",
+                        "다육식물",
+                        CareLevel.NORMAL,
+                        LightRequirement.MEDIUM,
+                        WateringCycle.WEEKLY,
+                        "https:111,111",
+                        "화분 포함",
+                        "부분 부분 금색 빛이 도는 식물",
+                        5000,
                         10,
                         ProductStatus.ON_SALE
                 )

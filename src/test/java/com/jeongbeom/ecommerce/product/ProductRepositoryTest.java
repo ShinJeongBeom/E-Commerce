@@ -6,8 +6,7 @@ import com.jeongbeom.ecommerce.member.repository.MemberRepository;
 import com.jeongbeom.ecommerce.order.dto.OrderCreateRequestDto;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
 import com.jeongbeom.ecommerce.order.service.OrderService;
-import com.jeongbeom.ecommerce.product.entity.Product;
-import com.jeongbeom.ecommerce.product.entity.ProductStatus;
+import com.jeongbeom.ecommerce.product.entity.*;
 import com.jeongbeom.ecommerce.product.entity.repository.ProductRepository;
 import com.jeongbeom.ecommerce.product.exception.InvalidStockQuantityException;
 import com.jeongbeom.ecommerce.product.exception.NotEnoughStockException;
@@ -37,9 +36,15 @@ class ProductRepositoryTest {
     void 상품_저장_및_조회_테스트() {
         // given
         Product product = new Product(
-                "아이폰",
-                "애플 스마트폰",
-                1000000,
+                "방울복랑금",
+                "다육식물",
+                CareLevel.NORMAL,
+                LightRequirement.MEDIUM,
+                WateringCycle.WEEKLY,
+                "https:111,111",
+                "화분 포함",
+                "부분 부분 금색 빛이 도는 식물",
+                5000,
                 10,
                 ProductStatus.ON_SALE
         );
@@ -59,9 +64,15 @@ class ProductRepositoryTest {
     @Test
     void 재고_감소_테스트() {
         Product product = new Product(
-                "아이폰",
-                "애플 스마트폰",
-                1000000,
+                "방울복랑금",
+                "다육식물",
+                CareLevel.NORMAL,
+                LightRequirement.MEDIUM,
+                WateringCycle.WEEKLY,
+                "https:111,111",
+                "화분 포함",
+                "부분 부분 금색 빛이 도는 식물",
+                5000,
                 10,
                 ProductStatus.ON_SALE
         );
@@ -74,16 +85,21 @@ class ProductRepositoryTest {
     @Test
     void 재고_부족_예외() {
         Product product = new Product(
-                "아이폰",
-                "애플 스마트폰",
-                1000000,
-                5,
+                "방울복랑금",
+                "다육식물",
+                CareLevel.NORMAL,
+                LightRequirement.MEDIUM,
+                WateringCycle.WEEKLY,
+                "https:111,111",
+                "화분 포함",
+                "부분 부분 금색 빛이 도는 식물",
+                5000,
+                10,
                 ProductStatus.ON_SALE
         );
 
-        assertThatThrownBy(() -> product.decreaseStock(10))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("재고 부족");
+        assertThatThrownBy(() -> product.decreaseStock(11))
+                .isInstanceOf(NotEnoughStockException.class);
     }
 
     @Test
@@ -94,7 +110,19 @@ class ProductRepositoryTest {
         );
 
         Product product = productRepository.save(
-                new Product("후드티", "검정 후드티", 70000, 1, ProductStatus.ON_SALE)
+                new Product(
+                        "방울복랑금",
+                        "다육식물",
+                        CareLevel.NORMAL,
+                        LightRequirement.MEDIUM,
+                        WateringCycle.WEEKLY,
+                        "https:111,111",
+                        "화분 포함",
+                        "부분 부분 금색 빛이 도는 식물",
+                        5000,
+                        1,
+                        ProductStatus.ON_SALE
+                )
         );
 
         OrderCreateRequestDto requestDto = new OrderCreateRequestDto(
@@ -120,7 +148,19 @@ class ProductRepositoryTest {
         );
 
         Product product = productRepository.save(
-                new Product("반팔 티셔츠", "흰색 반팔 티셔츠", 30000, 10, ProductStatus.ON_SALE)
+                new Product(
+                        "방울복랑금",
+                        "다육식물",
+                        CareLevel.NORMAL,
+                        LightRequirement.MEDIUM,
+                        WateringCycle.WEEKLY,
+                        "https:111,111",
+                        "화분 포함",
+                        "부분 부분 금색 빛이 도는 식물",
+                        5000,
+                        10,
+                        ProductStatus.ON_SALE
+                )
         );
 
         OrderCreateRequestDto requestDto = new OrderCreateRequestDto(
