@@ -37,7 +37,7 @@ public class OrderService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
         //상품 조회
-        Product product = productRepository.findById(orderCreateRequestDto.getProductId())
+        Product product = productRepository.findByIdWithLock(orderCreateRequestDto.getProductId())
                 .orElseThrow(ProductNotFoundException::new);
 
         //재고 차감

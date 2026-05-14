@@ -1,13 +1,15 @@
 package com.jeongbeom.ecommerce.order.service;
 
-import com.jeongbeom.ecommerce.common.entity.Role;
 import com.jeongbeom.ecommerce.member.entity.Member;
+import com.jeongbeom.ecommerce.common.entity.Role;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
 import com.jeongbeom.ecommerce.order.dto.OrderCreateRequestDto;
 import com.jeongbeom.ecommerce.order.entity.Order;
 import com.jeongbeom.ecommerce.order.entity.OrderItem;
+import com.jeongbeom.ecommerce.order.entity.OrderStatus;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderItemRepository;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
+import com.jeongbeom.ecommerce.order.service.OrderService;
 import com.jeongbeom.ecommerce.product.entity.Product;
 import com.jeongbeom.ecommerce.product.entity.ProductStatus;
 import com.jeongbeom.ecommerce.product.entity.repository.ProductRepository;
@@ -41,7 +43,7 @@ class OrderServiceTest {
     private OrderItemRepository orderItemRepository;
 
     @Test
-    @DisplayName("주문 생성 시 주문, 주문상품이 저장되고 재고가 감소한다")
+    @DisplayName("주문 생성 시 주문과 주문상품이 저장되고 재고가 감소한다")
     void 주문_생성_테스트() {
         // given
         String email = "orderservice" + System.currentTimeMillis() + "@test.com";
@@ -66,7 +68,6 @@ class OrderServiceTest {
         );
 
         OrderCreateRequestDto requestDto = new OrderCreateRequestDto(
-                member.getId(),
                 product.getId(),
                 2,
                 "신정범",
@@ -75,7 +76,7 @@ class OrderServiceTest {
         );
 
         // when
-        orderService.createOrder(requestDto);
+        orderService.createOrder(member.getId(), requestDto);
 
         // then
         List<Order> orders = orderRepository.findByMember(member);
@@ -91,6 +92,7 @@ class OrderServiceTest {
 
         assertThat(savedOrder.getMember().getId()).isEqualTo(member.getId());
         assertThat(savedOrder.getTotalPrice()).isEqualTo(200000);
+        assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.CREATED);
         assertThat(savedOrder.getName()).isEqualTo("신정범");
         assertThat(savedOrder.getPhone()).isEqualTo("010-1111-2222");
         assertThat(savedOrder.getAddress()).isEqualTo("서울시 강남구");
@@ -101,5 +103,56 @@ class OrderServiceTest {
         assertThat(savedOrderItem.getOrderPrice()).isEqualTo(100000);
 
         assertThat(foundProduct.getStock()).isEqualTo(8);
+    }
+
+    @Test
+    @DisplayName("주문 취소 시 주문 상태가 취소로 변경되고 재고가 복구된다")
+    void 주문_취소_테스트() {
+        // given
+        String email = "cancelservice" + System.currentTimeMillis() + "@test.com";
+
+        Member member = memberRepository.save(
+                new Member(
+                        email,
+                        "1234",
+                        "010-2222-3333",
+                        Role.USER
+                )
+        );
+
+        Product product = productRepository.save(
+                new Product(
+                        "마우스",
+                        "무선 마우스",
+                        50000,
+                        10,
+                        ProductStatus.ON_SALE
+                )
+        );
+
+        OrderCreateRequestDto requestDto = new OrderCreateRequestDto(
+                product.getId(),
+                2,
+                "신정범",
+                "010-2222-3333",
+                "서울시 서초구"
+        );
+
+        orderService.createOrder(member.getId(), requestDto);
+
+        Order savedOrder = orderRepository.findByMember(member).get(0);
+
+        // when
+        orderService.cancelOrder(savedOrder.getId());
+
+        // then
+        Order cancelledOrder = orderRepository.findById(savedOrder.getId()).orElseThrow();
+        Product restoredProduct = productRepository.findById(product.getId()).orElseThrow();
+
+        //상태 변경 확인
+        assertThat(cancelledOrder.getStatus()).isEqualTo(OrderStatus.CANCELLED);
+
+        //재고 복구 확인
+        assertThat(restoredProduct.getStock()).isEqualTo(10);
     }
 }
