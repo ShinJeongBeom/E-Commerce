@@ -42,7 +42,7 @@ class OrderStockConcurrencyTest {
     @DisplayName("동시에 주문해도 재고가 음수가 되지 않는다")
     void 동시_주문_재고_차감_테스트() throws InterruptedException {
         Member member = memberRepository.save(
-                new Member("concurrency@test.com", "1234", "010-1111-2222", Role.USER)
+                new Member("concurrency" + System.currentTimeMillis() + "@test.com", "1234", "010-1111-2222", Role.USER)
         );
 
         Product product = productRepository.save(
