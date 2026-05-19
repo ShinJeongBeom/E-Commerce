@@ -28,12 +28,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         where (:careLevel is null or p.careLevel = :careLevel)
           and (:lightRequirement is null or p.lightRequirement = :lightRequirement)
           and (:wateringCycle is null or p.wateringCycle = :wateringCycle)
-          and p.status <> com.jeongbeom.ecommerce.product.entity.ProductStatus.HIDDEN
+          and p.status <> :hiddenStatus
         """)
     List<Product> findProductsByFilters(
             @Param("careLevel") CareLevel careLevel,
             @Param("lightRequirement") LightRequirement lightRequirement,
-            @Param("wateringCycle") WateringCycle wateringCycle
+            @Param("wateringCycle") WateringCycle wateringCycle,
+            @Param("hiddenStatus") ProductStatus hiddenStatus
     );
 
 }

@@ -58,10 +58,16 @@ public class ProductService {
             LightRequirement lightRequirement,
             WateringCycle wateringCycle
     ) {
-        return productRepository.findProductsByFilters(careLevel, lightRequirement, wateringCycle).stream()
+        return productRepository.findProductsByFilters(
+                        careLevel,
+                        lightRequirement,
+                        wateringCycle,
+                        ProductStatus.HIDDEN
+                ).stream()
                 .map(ProductResponse::new)
                 .toList();
     }
+
     // 상품 수정
     @Transactional
     public void updateProduct(Long productId, ProductUpdateRequest request) {
