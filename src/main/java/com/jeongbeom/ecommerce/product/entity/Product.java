@@ -68,6 +68,36 @@ public class Product extends BaseTimeEntity {
         this.status = status;
     }
 
+    public void update(
+            String name,
+            String plantType,
+            CareLevel careLevel,
+            LightRequirement lightRequirement,
+            WateringCycle wateringCycle,
+            String imageUrl,
+            String potIncluded,
+            String description,
+            int price,
+            int stock,
+            ProductStatus status
+    ) {
+        this.name = name;
+        this.plantType = plantType;
+        this.careLevel = careLevel;
+        this.lightRequirement = lightRequirement;
+        this.wateringCycle = wateringCycle;
+        this.imageUrl = imageUrl;
+        this.potIncluded = potIncluded;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
+        this.status = status;
+    }
+
+    public void hide() {
+        this.status = ProductStatus.HIDDEN;
+    }
+
     // 재고 감소
     public void decreaseStock(int quantity){
         if (quantity <= 0){

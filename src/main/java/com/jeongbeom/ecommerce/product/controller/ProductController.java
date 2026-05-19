@@ -2,15 +2,14 @@ package com.jeongbeom.ecommerce.product.controller;
 
 import com.jeongbeom.ecommerce.product.dto.ProductCreateRequest;
 import com.jeongbeom.ecommerce.product.dto.ProductResponse;
+import com.jeongbeom.ecommerce.product.dto.ProductUpdateRequest;
+import com.jeongbeom.ecommerce.product.entity.CareLevel;
+import com.jeongbeom.ecommerce.product.entity.LightRequirement;
+import com.jeongbeom.ecommerce.product.entity.WateringCycle;
 import com.jeongbeom.ecommerce.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,8 +31,30 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProduct(productId));
     }
 
+    // 상품 정보 수정
+    @PutMapping("/{productId}")
+    public ResponseEntity<Void> updateProduct(
+            @PathVariable Long productId,
+            @RequestBody ProductUpdateRequest request
+    ) {
+        productService.updateProduct(productId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    // 상품 정보 조회
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> getProducts() {
-        return ResponseEntity.ok(productService.getProducts());
+    public ResponseEntity<List<ProductResponse>> getProducts(
+            @RequestParam(required = false) CareLevel careLevel,
+            @RequestParam(required = false) LightRequirement lightRequirement,
+            @RequestParam(required = false) WateringCycle wateringCycle
+    ) {
+        return ResponseEntity.ok(productService.getProducts(careLevel, lightRequirement, wateringCycle));
+    }
+
+    // 특정 상품 삭제(상태변경)
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
+        productService.deleteProduct(productId);
+        return ResponseEntity.ok().build();
     }
 }

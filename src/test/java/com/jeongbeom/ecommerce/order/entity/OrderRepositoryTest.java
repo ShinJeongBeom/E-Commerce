@@ -24,7 +24,7 @@ class OrderRepositoryTest {
 
         // 1. 회원 생성
         Member member = new Member(
-                "test@test.com",
+                "orderrepository" + System.currentTimeMillis() + "@test.com",
                 "1234",
                 "010-1234-1234",
                 Role.USER
@@ -50,4 +50,3 @@ class OrderRepositoryTest {
         System.out.println("member = " + order.getMember().getEmail());
     }
 }
-
