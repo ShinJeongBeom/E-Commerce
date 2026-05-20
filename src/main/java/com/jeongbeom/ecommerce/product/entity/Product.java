@@ -1,6 +1,8 @@
 package com.jeongbeom.ecommerce.product.entity;
 
 import com.jeongbeom.ecommerce.common.entity.BaseTimeEntity;
+import com.jeongbeom.ecommerce.product.exception.InvalidStockQuantityException;
+import com.jeongbeom.ecommerce.product.exception.NotEnoughStockException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +20,27 @@ public class Product extends BaseTimeEntity {
     private String name; //상품 이름
 
     @Column(nullable = false)
+    private String plantType; // 식물 종류
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CareLevel careLevel; // 관리 난이도
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LightRequirement lightRequirement; // 햇빛 쬐는 정도
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private WateringCycle wateringCycle; // 물주는 주기
+
+    @Column(nullable = false)
+    private String potIncluded; // 화분 포함 여부
+
+    @Column(nullable = false)
+    private String imageUrl; // 상품 이미지 URL
+
+    @Column(nullable = false)
     private String description; //상품 상세 설명
 
     @Column(nullable = false)
@@ -30,20 +53,61 @@ public class Product extends BaseTimeEntity {
     @Column(nullable = false)
     private ProductStatus status;  //상품 상태
 
-    // 생성자
-    public Product(String name, String description, int price, int stock, ProductStatus status) {
+    //생성자
+    public Product(String name, String plantType, CareLevel careLevel, LightRequirement lightRequirement, WateringCycle wateringCycle, String imageUrl, String potIncluded, String description, int price, int stock, ProductStatus status) {
         this.name = name;
+        this.plantType = plantType;
+        this.careLevel = careLevel;
+        this.lightRequirement = lightRequirement;
+        this.wateringCycle = wateringCycle;
+        this.imageUrl = imageUrl;
+        this.potIncluded = potIncluded;
         this.description = description;
         this.price = price;
         this.stock = stock;
         this.status = status;
     }
 
+    public void update(
+            String name,
+            String plantType,
+            CareLevel careLevel,
+            LightRequirement lightRequirement,
+            WateringCycle wateringCycle,
+            String imageUrl,
+            String potIncluded,
+            String description,
+            int price,
+            int stock,
+            ProductStatus status
+    ) {
+        this.name = name;
+        this.plantType = plantType;
+        this.careLevel = careLevel;
+        this.lightRequirement = lightRequirement;
+        this.wateringCycle = wateringCycle;
+        this.imageUrl = imageUrl;
+        this.potIncluded = potIncluded;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
+        this.status = status;
+    }
+
+    public void hide() {
+        this.status = ProductStatus.HIDDEN;
+    }
+
     // 재고 감소
     public void decreaseStock(int quantity){
-        if(stock < quantity){
-            throw new IllegalArgumentException("재고 부족");
+        if (quantity <= 0){
+            throw new InvalidStockQuantityException();
         }
+
+        if (stock < quantity){
+           throw new NotEnoughStockException();
+        }
+
         this.stock -= quantity;
     }
 
