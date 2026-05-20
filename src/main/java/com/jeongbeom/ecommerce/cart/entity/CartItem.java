@@ -1,5 +1,6 @@
 package com.jeongbeom.ecommerce.cart.entity;
 
+import com.jeongbeom.ecommerce.cart.exception.InvalidCartQuantityException;
 import com.jeongbeom.ecommerce.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -45,5 +46,12 @@ public class CartItem {
         this.quantity = quantity;
     }
 
+    public void changeQuantity(int quantity) {
+        if (quantity <= 0) {
+            throw new InvalidCartQuantityException();
+        }
 
+        this.quantity = quantity;
+
+    }
 }
