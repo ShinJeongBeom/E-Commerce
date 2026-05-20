@@ -1,6 +1,7 @@
 package com.jeongbeom.ecommerce.cart.controller;
 
 import com.jeongbeom.ecommerce.cart.dto.AddCartRequestDto;
+import com.jeongbeom.ecommerce.cart.dto.CartItemQuantityUpdateRequest;
 import com.jeongbeom.ecommerce.cart.dto.CartItemResponseDto;
 import com.jeongbeom.ecommerce.cart.service.CartService;
 import lombok.RequiredArgsConstructor;
@@ -47,5 +48,19 @@ public class CartController {
         cartService.removeCartItem(memberId, cartItemId);
 
         return ResponseEntity.ok("장바구니 삭제 완료");
+    }
+    /**
+     * 장바구니 수량 변경
+     */
+    @PatchMapping("/items/{cartItemId}")
+    public ResponseEntity<String> updateCartItemQuantity(
+            Authentication authentication,
+            @PathVariable Long cartItemId,
+            @RequestBody CartItemQuantityUpdateRequest request
+    ) {
+        Long memberId = Long.parseLong(authentication.getName());
+        cartService.updateCartItemQuantity(memberId, cartItemId, request);
+
+        return ResponseEntity.ok("장바구니 상품 수량 변경 완료");
     }
 }

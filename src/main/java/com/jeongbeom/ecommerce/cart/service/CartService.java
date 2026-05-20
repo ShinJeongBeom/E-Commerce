@@ -1,11 +1,14 @@
 package com.jeongbeom.ecommerce.cart.service;
 
 import com.jeongbeom.ecommerce.cart.dto.AddCartRequestDto;
+import com.jeongbeom.ecommerce.cart.dto.CartItemQuantityUpdateRequest;
 import com.jeongbeom.ecommerce.cart.dto.CartItemResponseDto;
 import com.jeongbeom.ecommerce.cart.entity.Cart;
 import com.jeongbeom.ecommerce.cart.entity.CartItem;
 import com.jeongbeom.ecommerce.cart.entity.repository.CartItemRepository;
 import com.jeongbeom.ecommerce.cart.entity.repository.CartRepository;
+import com.jeongbeom.ecommerce.cart.exception.CartItemNotFoundException;
+import com.jeongbeom.ecommerce.cart.exception.CartNotFoundException;
 import com.jeongbeom.ecommerce.member.entity.Member;
 import com.jeongbeom.ecommerce.member.exception.MemberNotFoundException;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
@@ -119,5 +122,29 @@ public class CartService {
         cart.removeCartItem(cartItem);
         cartItemRepository.delete(cartItem);
     }
+
+    //수량 변경
+    @Transactional
+    public void updateCartItemQuantity(
+            Long memberId,
+            Long cartItemId,
+            CartItemQuantityUpdateRequest request
+    ) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        Cart cart = cartRepository.findByMember(member)
+                .orElseThrow(CartNotFoundException::new);
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(CartItemNotFoundException::new);
+
+        if (!cartItem.getCart().getId().equals(cart.getId())) {
+            throw new CartItemNotFoundException();
+        }
+
+        cartItem.changeQuantity(request.getQuantity());
+    }
+
 
 }
