@@ -1,8 +1,15 @@
 package com.jeongbeom.ecommerce.order.service;
 
+import com.jeongbeom.ecommerce.cart.entity.Cart;
+import com.jeongbeom.ecommerce.cart.entity.CartItem;
+import com.jeongbeom.ecommerce.cart.entity.repository.CartItemRepository;
+import com.jeongbeom.ecommerce.cart.entity.repository.CartRepository;
+import com.jeongbeom.ecommerce.cart.exception.CartItemNotFoundException;
+import com.jeongbeom.ecommerce.cart.exception.CartNotFoundException;
 import com.jeongbeom.ecommerce.member.entity.Member;
 import com.jeongbeom.ecommerce.member.exception.MemberNotFoundException;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
+import com.jeongbeom.ecommerce.order.dto.CartOrderRequest;
 import com.jeongbeom.ecommerce.order.dto.OrderCreateRequestDto;
 import com.jeongbeom.ecommerce.order.dto.OrderResponseDto;
 import com.jeongbeom.ecommerce.order.entity.Order;
@@ -28,6 +35,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final OrderItemRepository orderItemRepository;
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
 
     //주문 생성
     @Transactional
@@ -102,5 +111,87 @@ public class OrderService {
                 .map(OrderResponseDto::new)
                 .toList();
     }
+
+    //장바구니 선택 주문
+    @Transactional
+    public void createOrderFromCartItems(Long memberId, CartOrderRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        List<CartItem> cartItems = cartItemRepository.findAllById(request.getCartItemIds());
+
+        if (cartItems.size() != request.getCartItemIds().size()) {
+            throw new CartItemNotFoundException();
+        }
+
+        int totalPrice = 0;
+
+        Order order = new Order(
+                member,
+                "ORD-" + System.currentTimeMillis(),
+                0,
+                OrderStatus.CREATED,
+                request.getName(),
+                request.getPhone(),
+                request.getAddress()
+        );
+
+        Order savedOrder = orderRepository.save(order);
+
+        for (CartItem cartItem : cartItems) {
+            if (!cartItem.getCart().getMember().getId().equals(memberId)) {
+                throw new CartItemNotFoundException();
+            }
+
+            Product product = productRepository.findByIdWithLock(cartItem.getProduct().getId())
+                    .orElseThrow(ProductNotFoundException::new);
+
+            product.decreaseStock(cartItem.getQuantity());
+
+            int orderPrice = product.getPrice();
+            totalPrice += orderPrice * cartItem.getQuantity();
+
+            OrderItem orderItem = new OrderItem(
+                    savedOrder,
+                    product,
+                    cartItem.getQuantity(),
+                    orderPrice
+            );
+
+            orderItemRepository.save(orderItem);
+        }
+
+        savedOrder.changeTotalPrice(totalPrice);
+
+        cartItemRepository.deleteAll(cartItems);
+    }
+
+    //전체 장바구니 주문
+    @Transactional
+    public void createOrderFromCart(Long memberId, CartOrderRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        Cart cart = cartRepository.findByMember(member)
+                .orElseThrow(CartNotFoundException::new);
+
+        List<CartItem> cartItems = cartItemRepository.findByCart(cart);
+
+        if (cartItems.isEmpty()) {
+            throw new CartItemNotFoundException();
+        }
+
+        CartOrderRequest cartOrderRequest = new CartOrderRequest(
+                cartItems.stream()
+                        .map(CartItem::getId)
+                        .toList(),
+                request.getName(),
+                request.getPhone(),
+                request.getAddress()
+        );
+
+        createOrderFromCartItems(memberId, cartOrderRequest);
+    }
+
 
 }
