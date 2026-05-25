@@ -9,6 +9,8 @@ import com.jeongbeom.ecommerce.order.entity.OrderItem;
 import com.jeongbeom.ecommerce.order.entity.OrderStatus;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderItemRepository;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
+import com.jeongbeom.ecommerce.order.exception.OrderAccessDeniedException;
+import com.jeongbeom.ecommerce.order.exception.OrderAlreadyCancelledException;
 import com.jeongbeom.ecommerce.order.service.OrderService;
 import com.jeongbeom.ecommerce.product.entity.Product;
 import com.jeongbeom.ecommerce.product.entity.CareLevel;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -158,7 +161,7 @@ class OrderServiceTest {
         Order savedOrder = orderRepository.findByMember(member).get(0);
 
         // when
-        orderService.cancelOrder(savedOrder.getId());
+        orderService.cancelOrder(member.getId(), savedOrder.getId());
 
         // then
         Order cancelledOrder = orderRepository.findById(savedOrder.getId()).orElseThrow();
@@ -169,5 +172,113 @@ class OrderServiceTest {
 
         //재고 복구 확인
         assertThat(restoredProduct.getStock()).isEqualTo(10);
+    }
+
+    @Test
+    @DisplayName("본인의 주문이 아니면 주문을 취소할 수 없다")
+    void 본인_주문이_아니면_취소_실패_테스트() {
+        // given
+        Member orderMember = memberRepository.save(
+                new Member(
+                        "orderowner" + System.currentTimeMillis() + "@test.com",
+                        "1234",
+                        "010-3333-4444",
+                        Role.USER
+                )
+        );
+
+        Member otherMember = memberRepository.save(
+                new Member(
+                        "othermember" + System.currentTimeMillis() + "@test.com",
+                        "1234",
+                        "010-5555-6666",
+                        Role.USER
+                )
+        );
+
+        Product product = productRepository.save(
+                new Product(
+                        "방울복랑금",
+                        "다육식물",
+                        CareLevel.NORMAL,
+                        LightRequirement.MEDIUM,
+                        WateringCycle.WEEKLY,
+                        "https:111,111",
+                        "화분 포함",
+                        "부분 부분 금색 빛이 도는 식물",
+                        5000,
+                        10,
+                        ProductStatus.ON_SALE
+                )
+        );
+
+        OrderCreateRequestDto requestDto = new OrderCreateRequestDto(
+                product.getId(),
+                2,
+                "신정범",
+                "010-3333-4444",
+                "서울시 강남구"
+        );
+
+        orderService.createOrder(orderMember.getId(), requestDto);
+        Order savedOrder = orderRepository.findByMember(orderMember).get(0);
+
+        // when & then
+        assertThatThrownBy(() -> orderService.cancelOrder(otherMember.getId(), savedOrder.getId()))
+                .isInstanceOf(OrderAccessDeniedException.class);
+
+        Product foundProduct = productRepository.findById(product.getId()).orElseThrow();
+        assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.CREATED);
+        assertThat(foundProduct.getStock()).isEqualTo(8);
+    }
+
+    @Test
+    @DisplayName("이미 취소된 주문은 다시 취소할 수 없다")
+    void 이미_취소된_주문_재취소_실패_테스트() {
+        // given
+        Member member = memberRepository.save(
+                new Member(
+                        "alreadycancel" + System.currentTimeMillis() + "@test.com",
+                        "1234",
+                        "010-7777-8888",
+                        Role.USER
+                )
+        );
+
+        Product product = productRepository.save(
+                new Product(
+                        "방울복랑금",
+                        "다육식물",
+                        CareLevel.NORMAL,
+                        LightRequirement.MEDIUM,
+                        WateringCycle.WEEKLY,
+                        "https:111,111",
+                        "화분 포함",
+                        "부분 부분 금색 빛이 도는 식물",
+                        5000,
+                        10,
+                        ProductStatus.ON_SALE
+                )
+        );
+
+        OrderCreateRequestDto requestDto = new OrderCreateRequestDto(
+                product.getId(),
+                2,
+                "신정범",
+                "010-7777-8888",
+                "서울시 강남구"
+        );
+
+        orderService.createOrder(member.getId(), requestDto);
+        Order savedOrder = orderRepository.findByMember(member).get(0);
+        orderService.cancelOrder(member.getId(), savedOrder.getId());
+
+        // when & then
+        assertThatThrownBy(() -> orderService.cancelOrder(member.getId(), savedOrder.getId()))
+                .isInstanceOf(OrderAlreadyCancelledException.class);
+
+        Product foundProduct = productRepository.findById(product.getId()).orElseThrow();
+        assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(foundProduct.getStock()).isEqualTo(10);
     }
 }

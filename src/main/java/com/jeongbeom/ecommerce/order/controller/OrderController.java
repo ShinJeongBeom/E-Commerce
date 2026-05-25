@@ -29,8 +29,10 @@ public class OrderController {
 
     // 주문 취소
     @PostMapping("/{orderId}/cancel")
-    public ResponseEntity<String> cancelOrder(@PathVariable Long orderId) {
-        orderService.cancelOrder(orderId);
+    public ResponseEntity<String> cancelOrder(Authentication authentication,
+                                              @PathVariable Long orderId) {
+       Long memberId = Long.parseLong(authentication.getName());
+       orderService.cancelOrder(memberId, orderId);
         return ResponseEntity.ok("주문이 취소되었습니다.");
     }
 
