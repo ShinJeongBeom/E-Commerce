@@ -14,7 +14,9 @@ public enum ErrorCode {
     INVALID_STOCK_QUANTITY(HttpStatus.BAD_REQUEST, "재고 수량은 1개 이상이어야 합니다."),
     INVALID_CART_QUANTITY(HttpStatus.BAD_REQUEST, "장바구니 수량은 1개 이상이어야 합니다."),
     CART_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니가 존재하지 않습니다."),
-    CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니 상품이 존재하지 않습니다.");
+    CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니 상품이 존재하지 않습니다."),
+    ORDER_ACCESS_DENIED(HttpStatus.FORBIDDEN,"본인의 주문만 처리할 수 있습니다." ),
+    ORDER_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "이미 취소된 주문입니다.");
 
     private final HttpStatus status;
     private final String message;

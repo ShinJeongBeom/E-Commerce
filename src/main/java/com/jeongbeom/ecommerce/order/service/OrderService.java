@@ -17,6 +17,8 @@ import com.jeongbeom.ecommerce.order.entity.OrderItem;
 import com.jeongbeom.ecommerce.order.entity.OrderStatus;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderItemRepository;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
+import com.jeongbeom.ecommerce.order.exception.OrderAccessDeniedException;
+import com.jeongbeom.ecommerce.order.exception.OrderAlreadyCancelledException;
 import com.jeongbeom.ecommerce.order.exception.OrderNotFoundException;
 import com.jeongbeom.ecommerce.product.entity.Product;
 import com.jeongbeom.ecommerce.product.entity.repository.ProductRepository;
@@ -83,17 +85,26 @@ public class OrderService {
 
     //주문 취소
     @Transactional
-    public void cancelOrder(Long orderId){
+    public void cancelOrder(Long memberId, Long orderId){
         // 주문 조회
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(OrderNotFoundException::new);
+
+        if(!order.getMember().getId().equals(memberId)){
+            throw new OrderAccessDeniedException();
+        }
+
+        if (order.getStatus() == OrderStatus.CANCELLED){
+            throw new OrderAlreadyCancelledException();
+        }
 
         // 주문 상품 조회
         List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
 
         // 재고 복구
         for(OrderItem orderItem : orderItems){
-            Product product = orderItem.getProduct();
+            Product product = productRepository.findByIdWithLock(orderItem.getProduct().getId())
+                    .orElseThrow(ProductNotFoundException::new);
             product.increaseStock(orderItem.getOrderQuantity());
         }
 
