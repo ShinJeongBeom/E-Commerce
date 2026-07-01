@@ -31,8 +31,12 @@ Ecommerce는 식물 및 식물 상품을 판매하는 커머스 서비스다.
 - [ ] BE 작업인지 FE 작업인지, 또는 두 저장소 연동 작업인지 구분한다.
 - [ ] 이번 작업이 현재 구현을 다루는지 향후 목표를 다루는지 구분한다.
 - [ ] 코드 변경이 허용된 작업인지 확인한다.
+- [ ] 작업이 복잡하거나 여러 파일을 바꾸면 `PLANS.md` 형식으로 계획을 먼저 작성한다.
 - [ ] 관련 문서(`api.md`, `FE_INTEGRATION.md`, `BRANCH_STRATEGY.md`, `commit.md`)를 확인한다.
+- [ ] 반복 작업이면 `.codex/skills/<skill-name>/SKILL.md` 중 적용할 skill을 확인한다.
+- [ ] 검증 기준이 애매하면 `evals/`의 평가 샘플과 PR 리뷰 체크리스트를 확인한다.
 - [ ] 민감정보, 운영 DB, 외부 배포 작업이 포함되는지 확인한다.
+- [ ] 파괴적 명령, 운영 데이터, 자격 증명, force push가 관련되면 `SAFETY.md`를 먼저 확인한다.
 
 ## AI 셋팅 브랜치 금지 규칙
 
@@ -105,6 +109,7 @@ Ecommerce는 식물 및 식물 상품을 판매하는 커머스 서비스다.
 
 | 작업 | 상세 문서 |
 |---|---|
+| 작업 계획·범위·검증 순서 | `PLANS.md` |
 | 역할·기능·상태 전이 | `PRODUCT_SPEC.md` |
 | 계층·트랜잭션·오류·관측성 | `ARCHITECTURE.md` |
 | REST API·DTO·Controller·응답 포맷 | `api.md` |
@@ -117,6 +122,27 @@ Ecommerce는 식물 및 식물 상품을 판매하는 커머스 서비스다.
 | Docker·DB 권한·EC2·CI/CD | `INFRA_CI.md` |
 | 커밋·PR·Notion·포트폴리오 | `WORKFLOW.md` |
 | 커밋 분리·메시지 작성·stage 검증 | `commit.md` |
+| 출시·PR 전 최종 확인 | `CHECKLIST.md` |
+| 파괴적 작업·비밀정보·운영 안전 | `SAFETY.md` |
+
+## 반복 작업 Skill 라우팅
+
+반복되는 작업은 `.codex/skills/`의 `SKILL.md`를 먼저 읽고 절차를 따른다. skill은 명령을
+자동 실행하는 코드가 아니라, AI가 반복 업무를 일관되게 수행하기 위한 작업 메뉴얼이다.
+
+| 상황 | Skill |
+|---|---|
+| API, DTO, Controller, 응답 포맷 변경 | `.codex/skills/api-change/SKILL.md` |
+| Vite React FE와 Spring Boot BE 연동 | `.codex/skills/fe-be-integration/SKILL.md` |
+| 커밋, push, PR, 배포 전 검증 | `.codex/skills/release-readiness/SKILL.md` |
+| 도메인 완료 후 Notion·포트폴리오 정리 | `.codex/skills/docs-portfolio/SKILL.md` |
+
+## 평가와 검증 레이어
+
+- `evals/harness-eval-samples.json`은 작업 유형별 필수 통과 조건을 정의한다.
+- `evals/pr-review-checklist.md`는 PR 전 자체 리뷰 질문과 결과 형식을 정의한다.
+- eval 파일은 실제 테스트를 대체하지 않고, 테스트 전에 빠뜨리기 쉬운 품질 기준을 확인하는 용도다.
+- 새 반복 작업이 생기면 skill을 추가하고, 해당 작업의 품질 기준을 eval에 추가한다.
 
 ## FE-BE 연동 규칙
 
