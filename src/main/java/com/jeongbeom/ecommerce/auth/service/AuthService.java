@@ -32,7 +32,7 @@ public class AuthService {
 
         String token = jwtUtil.createToken(member.getId());
 
-        return new LoginResponseDto(token);
+        return new LoginResponseDto(token, member.getLoginId(), member.getRole().name());
     }
 
     public boolean isLoginIdAvailable(String loginId) {
@@ -49,14 +49,23 @@ public class AuthService {
         }
 
         String encodedPassword = passwordEncoder.encode(signupRequestDto.getPassword());
+        Role role = resolveSignupRole(signupRequestDto.getRole());
 
         Member member = new Member(
                 signupRequestDto.getEmail(),
                 signupRequestDto.getLoginId(),
                 encodedPassword,
                 signupRequestDto.getPhone(),
-                Role.USER
+                role
         );
         memberRepository.save(member);
+    }
+
+    private Role resolveSignupRole(String role) {
+        if ("SELLER".equalsIgnoreCase(role)) {
+            return Role.SELLER;
+        }
+
+        return Role.USER;
     }
 }

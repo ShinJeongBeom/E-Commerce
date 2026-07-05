@@ -48,10 +48,14 @@ POST   /orders/cart/items
 {
   "email": "user@example.com",
   "loginId": "user123",
+  "role": "USER",
   "password": "password",
   "phone": "010-0000-0000"
 }
 ```
+
+- `role`: 공개 회원가입에서는 `USER` 또는 `SELLER`를 사용한다.
+- `ADMIN`은 공개 회원가입으로 생성하지 않는다.
 
 `POST /auth/login`
 
@@ -66,7 +70,9 @@ POST   /orders/cart/items
 
 ```json
 {
-  "accessToken": "jwt-token"
+  "accessToken": "jwt-token",
+  "loginId": "user123",
+  "role": "USER"
 }
 ```
 
