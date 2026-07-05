@@ -26,6 +26,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN")     // 상품등록은 ADMIN만 가능
                         .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")   // 상품 수정은 ADMIN만 가능
                         .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")// 상품 삭제는 ADMIN만 가는ㅇ
+                        .requestMatchers("/seller-center/**").hasAnyRole("SELLER", "ADMIN")
                         .anyRequest().authenticated()                             // 그 외 모든 요청 로그인 필요
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터를 기본 인증 필터보다 먼저 실행
