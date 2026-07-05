@@ -6,6 +6,7 @@ import lombok.Getter;
 public class SignupRequestDto {
 
     private String email;
+    private String loginId;
     private String password;
     private String phone;
 }

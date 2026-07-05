@@ -19,6 +19,9 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(unique = true)
+    private String loginId;
+
     @Column(nullable = false)
     private String password;
 
@@ -33,7 +36,12 @@ public class Member extends BaseTimeEntity {
     private Cart cart;
 
     public Member(String email, String password, String phone, Role role) {
+        this(email, email, password, phone, role);
+    }
+
+    public Member(String email, String loginId, String password, String phone, Role role) {
         this.email = email;
+        this.loginId = loginId;
         this.password = password;
         this.phone = phone;
         this.role = role;

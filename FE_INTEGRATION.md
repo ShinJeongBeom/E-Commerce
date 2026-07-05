@@ -60,15 +60,28 @@ VITE_API_BASE_URL=http://localhost:8080
 ```json
 {
   "email": "user@example.com",
+  "loginId": "user123",
   "password": "password",
   "phone": "010-0000-0000"
 }
 ```
 
-현재 FE 회원가입 폼에는 `name`, `loginId`, `address`, `addressDetail`도 있다. BE가 아직 받지 않는 값은
+FE는 회원가입 전에 `GET /auth/check-login-id?loginId={loginId}`로 아이디 중복 여부를 확인한다.
+응답이 `true`이면 사용 가능, `false`이면 이미 사용 중인 아이디다.
+
+현재 FE 회원가입 폼에는 `name`, `address`, `addressDetail`도 있다. BE가 아직 받지 않는 값은
 회원가입 요청 body에 포함하지 않거나, BE 회원 도메인 확장 작업에서 DTO와 Entity를 먼저 확장한다.
 
 ### 로그인
+
+현재 BE `LoginRequestDto`:
+
+```json
+{
+  "loginId": "user123",
+  "password": "password"
+}
+```
 
 현재 BE `LoginResponseDto`:
 
@@ -211,6 +224,7 @@ Content-Type: application/json
 - [ ] 로그인 성공 시 `accessToken` 저장
 - [ ] 인증 API에 `Authorization` 헤더 전달
 - [ ] 회원가입 요청 body가 현재 BE `SignupRequestDto`와 일치
+- [ ] 회원가입 전 `GET /auth/check-login-id`로 아이디 중복확인 수행
 - [ ] 상품 mock 제거 또는 API 데이터 우선 사용
 - [ ] `ProductResponse -> Product` adapter 존재
 - [ ] 장바구니 API가 BE DTO와 일치

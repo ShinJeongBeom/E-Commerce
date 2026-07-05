@@ -5,6 +5,8 @@ import com.jeongbeom.ecommerce.auth.dto.LoginResponseDto;
 import com.jeongbeom.ecommerce.auth.dto.SignupRequestDto;
 import com.jeongbeom.ecommerce.auth.jwt.JwtUtil;
 import com.jeongbeom.ecommerce.common.entity.Role;
+import com.jeongbeom.ecommerce.common.exception.CustomException;
+import com.jeongbeom.ecommerce.common.exception.ErrorCode;
 import com.jeongbeom.ecommerce.member.entity.Member;
 import com.jeongbeom.ecommerce.member.exception.MemberNotFoundException;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
@@ -21,7 +23,7 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
-        Member member = memberRepository.findByEmail(loginRequestDto.getEmail())
+        Member member = memberRepository.findByLoginId(loginRequestDto.getLoginId())
                 .orElseThrow(MemberNotFoundException::new);
 
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), member.getPassword())) {
@@ -33,11 +35,24 @@ public class AuthService {
         return new LoginResponseDto(token);
     }
 
+    public boolean isLoginIdAvailable(String loginId) {
+        return !memberRepository.existsByLoginId(loginId);
+    }
+
     public void signup (SignupRequestDto signupRequestDto){
+        if (memberRepository.existsByEmail(signupRequestDto.getEmail())) {
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
+        }
+
+        if (memberRepository.existsByLoginId(signupRequestDto.getLoginId())) {
+            throw new CustomException(ErrorCode.DUPLICATE_LOGIN_ID);
+        }
+
         String encodedPassword = passwordEncoder.encode(signupRequestDto.getPassword());
 
         Member member = new Member(
                 signupRequestDto.getEmail(),
+                signupRequestDto.getLoginId(),
                 encodedPassword,
                 signupRequestDto.getPhone(),
                 Role.USER
