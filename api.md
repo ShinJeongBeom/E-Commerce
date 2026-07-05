@@ -12,6 +12,7 @@ UseCase/command/result 구조는 향후 API 계약 정리 작업에서 적용한
 ```text
 POST   /auth/signup
 POST   /auth/login
+GET    /auth/check-login-id?loginId={loginId}
 
 GET    /products
 GET    /products/{productId}
@@ -46,6 +47,7 @@ POST   /orders/cart/items
 ```json
 {
   "email": "user@example.com",
+  "loginId": "user123",
   "password": "password",
   "phone": "010-0000-0000"
 }
@@ -55,7 +57,7 @@ POST   /orders/cart/items
 
 ```json
 {
-  "email": "user@example.com",
+  "loginId": "user123",
   "password": "password"
 }
 ```
@@ -67,6 +69,17 @@ POST   /orders/cart/items
   "accessToken": "jwt-token"
 }
 ```
+
+`GET /auth/check-login-id?loginId=user123`
+
+성공 응답:
+
+```json
+true
+```
+
+- `true`: 사용 가능한 아이디
+- `false`: 이미 사용 중인 아이디
 
 ### Product
 
