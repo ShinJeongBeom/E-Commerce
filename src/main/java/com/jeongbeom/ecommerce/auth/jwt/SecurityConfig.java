@@ -23,9 +23,10 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()                //회원가입&로그인 API는 누구나 가능
 
                         .requestMatchers(HttpMethod.GET, "/products/**").permitAll()        // 상품 조회는 누구나 가능
-                        .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN")     // 상품등록은 ADMIN만 가능
-                        .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")   // 상품 수정은 ADMIN만 가능
-                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")// 상품 삭제는 ADMIN만 가는ㅇ
+                        .requestMatchers(HttpMethod.POST, "/products").hasAnyRole("SELLER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/products/**").hasAnyRole("SELLER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasAnyRole("SELLER", "ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/seller-center/**").hasAnyRole("SELLER", "ADMIN")
                         .anyRequest().authenticated()                             // 그 외 모든 요청 로그인 필요
                 )

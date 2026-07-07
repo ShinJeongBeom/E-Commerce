@@ -3,6 +3,7 @@ package com.jeongbeom.ecommerce.product.entity;
 import com.jeongbeom.ecommerce.common.entity.BaseTimeEntity;
 import com.jeongbeom.ecommerce.product.exception.InvalidStockQuantityException;
 import com.jeongbeom.ecommerce.product.exception.NotEnoughStockException;
+import com.jeongbeom.ecommerce.seller.entity.SellerProfile;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,6 +50,10 @@ public class Product extends BaseTimeEntity {
     @Column(nullable = false)
     private int stock;  //상품 재고 수량
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_profile_id")
+    private SellerProfile sellerProfile;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductStatus status;  //상품 상태
@@ -66,6 +71,10 @@ public class Product extends BaseTimeEntity {
         this.price = price;
         this.stock = stock;
         this.status = status;
+    }
+
+    public void assignSellerProfile(SellerProfile sellerProfile) {
+        this.sellerProfile = sellerProfile;
     }
 
     public void update(

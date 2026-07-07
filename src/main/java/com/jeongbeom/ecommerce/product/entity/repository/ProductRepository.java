@@ -5,6 +5,7 @@ import com.jeongbeom.ecommerce.product.entity.LightRequirement;
 import com.jeongbeom.ecommerce.product.entity.Product;
 import com.jeongbeom.ecommerce.product.entity.ProductStatus;
 import com.jeongbeom.ecommerce.product.entity.WateringCycle;
+import com.jeongbeom.ecommerce.seller.entity.SellerProfile;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -21,6 +22,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 단건 조회 메서드
     Optional<Product> findByIdAndStatusNot(Long id, ProductStatus status);
+
+    List<Product> findBySellerProfile(SellerProfile sellerProfile);
+
+    long countBySellerProfile(SellerProfile sellerProfile);
 
     @Query("""
         select p

@@ -31,4 +31,12 @@ public class SellerProfile extends BaseTimeEntity {
         this.storeName = storeName;
         this.approvalStatus = approvalStatus;
     }
+
+    public void approve() {
+        this.approvalStatus = SellerApprovalStatus.APPROVED;
+    }
+
+    public void suspend() {
+        this.approvalStatus = SellerApprovalStatus.SUSPENDED;
+    }
 }

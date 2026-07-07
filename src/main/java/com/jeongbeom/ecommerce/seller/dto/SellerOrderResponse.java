@@ -14,9 +14,13 @@ public class SellerOrderResponse {
     private final String shippingAddress;
 
     public SellerOrderResponse(Order order) {
+        this(order, order.getTotalPrice());
+    }
+
+    public SellerOrderResponse(Order order, int sellerTotalPrice) {
         this.id = order.getId();
         this.orderNumber = order.getOrderNumber();
-        this.totalPrice = order.getTotalPrice();
+        this.totalPrice = sellerTotalPrice;
         this.status = order.getStatus().name();
         this.receiverName = order.getName();
         this.receiverPhone = order.getPhone();
