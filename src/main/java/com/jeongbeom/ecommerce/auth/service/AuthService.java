@@ -10,6 +10,9 @@ import com.jeongbeom.ecommerce.common.exception.ErrorCode;
 import com.jeongbeom.ecommerce.member.entity.Member;
 import com.jeongbeom.ecommerce.member.exception.MemberNotFoundException;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
+import com.jeongbeom.ecommerce.seller.entity.SellerApprovalStatus;
+import com.jeongbeom.ecommerce.seller.entity.SellerProfile;
+import com.jeongbeom.ecommerce.seller.repository.SellerProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final MemberRepository memberRepository;
+    private final SellerProfileRepository sellerProfileRepository;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -59,6 +63,15 @@ public class AuthService {
                 role
         );
         memberRepository.save(member);
+
+        if (role == Role.SELLER) {
+            SellerProfile sellerProfile = new SellerProfile(
+                    member,
+                    signupRequestDto.getLoginId() + " 스토어",
+                    SellerApprovalStatus.PENDING
+            );
+            sellerProfileRepository.save(sellerProfile);
+        }
     }
 
     private Role resolveSignupRole(String role) {

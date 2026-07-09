@@ -8,6 +8,7 @@ import com.jeongbeom.ecommerce.product.entity.LightRequirement;
 import com.jeongbeom.ecommerce.product.entity.WateringCycle;
 import com.jeongbeom.ecommerce.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +22,11 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<Long> createProduct(@RequestBody ProductCreateRequest request) {
-        Long productId = productService.createProduct(request);
+    public ResponseEntity<Long> createProduct(
+            Authentication authentication,
+            @RequestBody ProductCreateRequest request
+    ) {
+        Long productId = productService.createProduct(getMemberId(authentication), request);
         return ResponseEntity.ok(productId);
     }
 
@@ -35,9 +39,10 @@ public class ProductController {
     @PutMapping("/{productId}")
     public ResponseEntity<Void> updateProduct(
             @PathVariable Long productId,
+            Authentication authentication,
             @RequestBody ProductUpdateRequest request
     ) {
-        productService.updateProduct(productId, request);
+        productService.updateProduct(getMemberId(authentication), productId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -53,8 +58,15 @@ public class ProductController {
 
     // 특정 상품 삭제(상태변경)
     @DeleteMapping("/{productId}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
-        productService.deleteProduct(productId);
+    public ResponseEntity<Void> deleteProduct(
+            @PathVariable Long productId,
+            Authentication authentication
+    ) {
+        productService.deleteProduct(getMemberId(authentication), productId);
         return ResponseEntity.ok().build();
+    }
+
+    private Long getMemberId(Authentication authentication) {
+        return Long.parseLong(authentication.getName());
     }
 }
