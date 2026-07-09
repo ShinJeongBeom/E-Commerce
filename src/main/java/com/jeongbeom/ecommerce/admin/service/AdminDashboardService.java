@@ -1,8 +1,16 @@
 package com.jeongbeom.ecommerce.admin.service;
 
 import com.jeongbeom.ecommerce.admin.dto.AdminDashboardResponse;
+import com.jeongbeom.ecommerce.admin.entity.AdminInquiryStatus;
+import com.jeongbeom.ecommerce.admin.entity.AdminReportStatus;
+import com.jeongbeom.ecommerce.admin.entity.AdminReportTargetType;
+import com.jeongbeom.ecommerce.admin.entity.AdminSettlementStatus;
+import com.jeongbeom.ecommerce.admin.repository.AdminInquiryRepository;
+import com.jeongbeom.ecommerce.admin.repository.AdminReportRepository;
+import com.jeongbeom.ecommerce.admin.repository.AdminSettlementRepository;
 import com.jeongbeom.ecommerce.common.entity.Role;
 import com.jeongbeom.ecommerce.member.entity.Member;
+import com.jeongbeom.ecommerce.member.entity.MemberStatus;
 import com.jeongbeom.ecommerce.member.exception.MemberNotFoundException;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
 import com.jeongbeom.ecommerce.order.entity.OrderStatus;
@@ -31,6 +39,9 @@ public class AdminDashboardService {
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final SellerProfileRepository sellerProfileRepository;
+    private final AdminInquiryRepository inquiryRepository;
+    private final AdminReportRepository reportRepository;
+    private final AdminSettlementRepository settlementRepository;
 
     public AdminDashboardResponse getDashboard(Long memberId) {
         Member admin = memberRepository.findById(memberId)
@@ -43,18 +54,22 @@ public class AdminDashboardService {
         AdminDashboardResponse.TodayStatusResponse todayStatus =
                 new AdminDashboardResponse.TodayStatusResponse(
                         memberRepository.countByCreatedAtBetween(startDateTime, endDateTime),
-                        0,
+                        memberRepository.countByStatusAndUpdatedAtBetween(MemberStatus.DELETED, startDateTime, endDateTime),
                         productRepository.countByCreatedAtBetween(startDateTime, endDateTime),
                         orderRepository.countByCreatedAtBetween(startDateTime, endDateTime)
                 );
 
         long sellerApprovalWaitingCount = sellerProfileRepository.countByApprovalStatus(SellerApprovalStatus.PENDING);
+        long pendingProductReportCount =
+                reportRepository.countByTargetTypeAndStatus(AdminReportTargetType.PRODUCT, AdminReportStatus.PENDING);
+        long pendingReviewReportCount =
+                reportRepository.countByTargetTypeAndStatus(AdminReportTargetType.REVIEW, AdminReportStatus.PENDING);
 
         AdminDashboardResponse.PendingStatusResponse pendingStatus =
                 new AdminDashboardResponse.PendingStatusResponse(
+                        pendingProductReportCount,
                         0,
-                        0,
-                        0,
+                        inquiryRepository.countByStatus(AdminInquiryStatus.WAITING),
                         0,
                         sellerApprovalWaitingCount,
                         orderRepository.countByStatusIn(List.of(OrderStatus.CREATED, OrderStatus.PAID, OrderStatus.PREPARING))
@@ -64,14 +79,9 @@ public class AdminDashboardService {
                 new AdminDashboardResponse.MarketplaceStatusResponse(
                         sellerApprovalWaitingCount,
                         sellerProfileRepository.countByCreatedAtBetween(startDateTime, endDateTime),
-                        orderRepository.sumTotalPriceByStatusIn(List.of(
-                                OrderStatus.PAID,
-                                OrderStatus.PREPARING,
-                                OrderStatus.SHIPPED,
-                                OrderStatus.DELIVERED
-                        )),
-                        0,
-                        0,
+                        settlementRepository.sumAmountByStatus(AdminSettlementStatus.PENDING),
+                        pendingProductReportCount,
+                        pendingReviewReportCount,
                         productRepository.countByStatus(ProductStatus.HIDDEN)
                 );
 

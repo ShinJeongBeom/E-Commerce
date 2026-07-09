@@ -32,6 +32,9 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    private MemberStatus status = MemberStatus.ACTIVE;
+
     @OneToOne(mappedBy = "member")
     private Cart cart;
 
@@ -45,5 +48,18 @@ public class Member extends BaseTimeEntity {
         this.password = password;
         this.phone = phone;
         this.role = role;
+        this.status = MemberStatus.ACTIVE;
+    }
+
+    public MemberStatus getStatus() {
+        return status == null ? MemberStatus.ACTIVE : status;
+    }
+
+    public void suspend() {
+        this.status = MemberStatus.SUSPENDED;
+    }
+
+    public void deleteAccount() {
+        this.status = MemberStatus.DELETED;
     }
 }
