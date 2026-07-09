@@ -8,6 +8,7 @@ import com.jeongbeom.ecommerce.common.entity.Role;
 import com.jeongbeom.ecommerce.common.exception.CustomException;
 import com.jeongbeom.ecommerce.common.exception.ErrorCode;
 import com.jeongbeom.ecommerce.member.entity.Member;
+import com.jeongbeom.ecommerce.member.entity.MemberStatus;
 import com.jeongbeom.ecommerce.member.exception.MemberNotFoundException;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
 import com.jeongbeom.ecommerce.seller.entity.SellerApprovalStatus;
@@ -29,6 +30,10 @@ public class AuthService {
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         Member member = memberRepository.findByLoginId(loginRequestDto.getLoginId())
                 .orElseThrow(MemberNotFoundException::new);
+
+        if (member.getStatus() != MemberStatus.ACTIVE) {
+            throw new CustomException(ErrorCode.MEMBER_NOT_ACTIVE);
+        }
 
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), member.getPassword())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");

@@ -1,12 +1,21 @@
 package com.jeongbeom.ecommerce.admin.service;
 
 import com.jeongbeom.ecommerce.admin.dto.AdminDashboardResponse;
+import com.jeongbeom.ecommerce.admin.entity.AdminInquiryStatus;
+import com.jeongbeom.ecommerce.admin.entity.AdminReportStatus;
+import com.jeongbeom.ecommerce.admin.entity.AdminReportTargetType;
+import com.jeongbeom.ecommerce.admin.entity.AdminSettlementStatus;
+import com.jeongbeom.ecommerce.admin.repository.AdminInquiryRepository;
+import com.jeongbeom.ecommerce.admin.repository.AdminReportRepository;
+import com.jeongbeom.ecommerce.admin.repository.AdminSettlementRepository;
 import com.jeongbeom.ecommerce.common.entity.Role;
 import com.jeongbeom.ecommerce.member.entity.Member;
+import com.jeongbeom.ecommerce.member.entity.MemberStatus;
 import com.jeongbeom.ecommerce.member.exception.MemberNotFoundException;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
 import com.jeongbeom.ecommerce.order.entity.OrderStatus;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
+import com.jeongbeom.ecommerce.product.entity.ProductStatus;
 import com.jeongbeom.ecommerce.product.entity.repository.ProductRepository;
 import com.jeongbeom.ecommerce.seller.entity.SellerApprovalStatus;
 import com.jeongbeom.ecommerce.seller.repository.SellerProfileRepository;
@@ -30,6 +39,9 @@ public class AdminDashboardService {
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final SellerProfileRepository sellerProfileRepository;
+    private final AdminInquiryRepository inquiryRepository;
+    private final AdminReportRepository reportRepository;
+    private final AdminSettlementRepository settlementRepository;
 
     public AdminDashboardResponse getDashboard(Long memberId) {
         Member admin = memberRepository.findById(memberId)
@@ -42,20 +54,35 @@ public class AdminDashboardService {
         AdminDashboardResponse.TodayStatusResponse todayStatus =
                 new AdminDashboardResponse.TodayStatusResponse(
                         memberRepository.countByCreatedAtBetween(startDateTime, endDateTime),
-                        0,
+                        memberRepository.countByStatusAndUpdatedAtBetween(MemberStatus.DELETED, startDateTime, endDateTime),
                         productRepository.countByCreatedAtBetween(startDateTime, endDateTime),
-                        0,
                         orderRepository.countByCreatedAtBetween(startDateTime, endDateTime)
                 );
 
+        long sellerApprovalWaitingCount = sellerProfileRepository.countByApprovalStatus(SellerApprovalStatus.PENDING);
+        long pendingProductReportCount =
+                reportRepository.countByTargetTypeAndStatus(AdminReportTargetType.PRODUCT, AdminReportStatus.PENDING);
+        long pendingReviewReportCount =
+                reportRepository.countByTargetTypeAndStatus(AdminReportTargetType.REVIEW, AdminReportStatus.PENDING);
+
         AdminDashboardResponse.PendingStatusResponse pendingStatus =
                 new AdminDashboardResponse.PendingStatusResponse(
+                        pendingProductReportCount,
                         0,
+                        inquiryRepository.countByStatus(AdminInquiryStatus.WAITING),
                         0,
-                        0,
-                        0,
-                        sellerProfileRepository.countByApprovalStatus(SellerApprovalStatus.PENDING),
+                        sellerApprovalWaitingCount,
                         orderRepository.countByStatusIn(List.of(OrderStatus.CREATED, OrderStatus.PAID, OrderStatus.PREPARING))
+                );
+
+        AdminDashboardResponse.MarketplaceStatusResponse marketplaceStatus =
+                new AdminDashboardResponse.MarketplaceStatusResponse(
+                        sellerApprovalWaitingCount,
+                        sellerProfileRepository.countByCreatedAtBetween(startDateTime, endDateTime),
+                        settlementRepository.sumAmountByStatus(AdminSettlementStatus.PENDING),
+                        pendingProductReportCount,
+                        pendingReviewReportCount,
+                        productRepository.countByStatus(ProductStatus.HIDDEN)
                 );
 
         return new AdminDashboardResponse(
@@ -66,6 +93,7 @@ public class AdminDashboardService {
                 createQuickMenus(),
                 todayStatus,
                 pendingStatus,
+                marketplaceStatus,
                 createImprovementPosts(),
                 createManualPosts()
         );

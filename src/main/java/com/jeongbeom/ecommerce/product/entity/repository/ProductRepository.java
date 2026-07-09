@@ -30,6 +30,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     long countByCreatedAtBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
+    long countByStatus(ProductStatus status);
+
     @Query("""
         select p
         from Product p

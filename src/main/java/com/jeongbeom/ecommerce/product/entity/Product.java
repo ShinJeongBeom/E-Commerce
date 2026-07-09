@@ -107,6 +107,10 @@ public class Product extends BaseTimeEntity {
         this.status = ProductStatus.HIDDEN;
     }
 
+    public void restore() {
+        this.status = stock <= 0 ? ProductStatus.SOLD_OUT : ProductStatus.ON_SALE;
+    }
+
     // 재고 감소
     public void decreaseStock(int quantity){
         if (quantity <= 0){

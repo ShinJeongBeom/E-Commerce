@@ -127,7 +127,6 @@ type AdminDashboardResponse = {
     memberSignupCount: number
     memberWithdrawalCount: number
     productCreatedCount: number
-    pageViewCount: number
     orderCount: number
   }
   pendingStatus: {
@@ -138,6 +137,14 @@ type AdminDashboardResponse = {
     sellerApprovalCount: number
     orderProcessingCount: number
   }
+  marketplaceStatus: {
+    sellerApprovalWaitingCount: number
+    todaySellerSignupCount: number
+    settlementPendingAmount: number
+    reportedProductCount: number
+    reportedReviewCount: number
+    suspendedProductCount: number
+  }
   improvementPosts: Array<{ title: string; authorLoginId: string; createdDate: string }>
   manualPosts: Array<{ title: string; authorLoginId: string; createdDate: string }>
 }
@@ -146,8 +153,49 @@ type AdminDashboardResponse = {
 주의:
 
 - 관리자 메인 화면은 기존 쇼핑몰 레이아웃과 분리된 운영 콘솔로 렌더링한다.
-- 신고, 문의, 게시판 도메인은 아직 없으므로 관련 영역은 BE 기본값을 화면에 표시한다.
+- Today 현황은 회원가입, 회원탈퇴, 상품등록, 주문건만 표시한다.
+- 판매자 승인 대기, 오늘 신규 판매자 가입, 정산 대기 금액, 신고된 상품, 신고된 리뷰,
+  판매 중지 상품은 오픈마켓 운영 지표로 별도 표시한다.
+- 신고, 문의, 게시판, 정산 영역은 관리자 운영용 최소 API와 연결하며 데이터가 없으면 빈 상태를 표시한다.
 - 관리자 API는 `ADMIN` 권한이 필요하며, 권한 실패 시 FE 에러 상태를 표시한다.
+
+## Admin Management 연동
+
+관리자 탭은 다음 API와 연결한다.
+
+```text
+GET    /admin/orders
+GET    /admin/members
+PATCH  /admin/members/{memberId}/suspend
+DELETE /admin/members/{memberId}
+GET    /admin/sellers
+PATCH  /admin/sellers/{sellerProfileId}/approve
+PATCH  /admin/sellers/{sellerProfileId}/suspend
+GET    /admin/products
+PATCH  /admin/products/{productId}/hide
+PATCH  /admin/products/{productId}/restore
+DELETE /admin/products/{productId}
+GET    /admin/banners
+POST   /admin/banners
+PUT    /admin/banners/{bannerId}
+DELETE /admin/banners/{bannerId}
+GET    /admin/policies
+POST   /admin/policies
+GET    /admin/boards
+POST   /admin/boards
+DELETE /admin/boards/{postId}
+GET    /admin/inquiries
+PATCH  /admin/inquiries/{inquiryId}/answer
+GET    /admin/reports
+POST   /admin/reports
+PATCH  /admin/reports/{reportId}/resolve
+GET    /admin/settlements
+POST   /admin/settlements
+PATCH  /admin/settlements/{settlementId}/complete
+```
+
+FE 관리자 탭은 목록 조회 시 로딩, 빈 상태, 에러 메시지를 표시한다. 상태 변경 버튼을 누르면 해당
+관리자 API를 호출한 뒤 현재 탭과 대시보드 현황을 다시 불러온다.
 
 ## Product 연동
 

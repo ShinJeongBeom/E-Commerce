@@ -1,0 +1,11 @@
+package com.jeongbeom.ecommerce.admin.repository;
+
+import com.jeongbeom.ecommerce.admin.entity.AdminPost;
+import com.jeongbeom.ecommerce.admin.entity.AdminPostType;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface AdminPostRepository extends JpaRepository<AdminPost, Long> {
+    List<AdminPost> findByTypeOrderByCreatedAtDesc(AdminPostType type);
+}

@@ -32,9 +32,36 @@ POST   /orders/cart
 POST   /orders/cart/items
 
 GET    /admin/dashboard
+GET    /admin/orders
+GET    /admin/members
+PATCH  /admin/members/{memberId}/suspend
+DELETE /admin/members/{memberId}
+GET    /admin/products
+PATCH  /admin/products/{productId}/hide
+PATCH  /admin/products/{productId}/restore
+DELETE /admin/products/{productId}
 GET    /admin/sellers
 PATCH  /admin/sellers/{sellerProfileId}/approve
 PATCH  /admin/sellers/{sellerProfileId}/suspend
+GET    /admin/banners
+POST   /admin/banners
+PUT    /admin/banners/{bannerId}
+DELETE /admin/banners/{bannerId}
+GET    /admin/policies
+POST   /admin/policies
+GET    /admin/boards
+POST   /admin/boards
+PUT    /admin/boards/{postId}
+DELETE /admin/boards/{postId}
+GET    /admin/inquiries
+POST   /admin/inquiries
+PATCH  /admin/inquiries/{inquiryId}/answer
+GET    /admin/reports
+POST   /admin/reports
+PATCH  /admin/reports/{reportId}/resolve
+GET    /admin/settlements
+POST   /admin/settlements
+PATCH  /admin/settlements/{settlementId}/complete
 ```
 
 - `/auth/**`는 인증 없이 접근한다.
@@ -177,7 +204,6 @@ Authorization: Bearer <ADMIN accessToken>
     "memberSignupCount": 0,
     "memberWithdrawalCount": 0,
     "productCreatedCount": 0,
-    "pageViewCount": 0,
     "orderCount": 0
   },
   "pendingStatus": {
@@ -187,6 +213,14 @@ Authorization: Bearer <ADMIN accessToken>
     "productInquiryCount": 0,
     "sellerApprovalCount": 0,
     "orderProcessingCount": 0
+  },
+  "marketplaceStatus": {
+    "sellerApprovalWaitingCount": 0,
+    "todaySellerSignupCount": 0,
+    "settlementPendingAmount": 0,
+    "reportedProductCount": 0,
+    "reportedReviewCount": 0,
+    "suspendedProductCount": 0
   },
   "improvementPosts": [
     {
@@ -206,8 +240,31 @@ Authorization: Bearer <ADMIN accessToken>
 ```
 
 - `todayStatus.memberSignupCount`, `productCreatedCount`, `orderCount`는 당일 `createdAt` 기준으로 집계한다.
-- 신고, 문의, 게시판 도메인이 아직 없으므로 관련 카운트와 목록은 현재 관리자 메인 화면용 기본값이다.
+- `todayStatus.memberWithdrawalCount`는 탈퇴 상태 도메인이 생기기 전까지 기본값 `0`을 응답한다.
+- `marketplaceStatus.sellerApprovalWaitingCount`는 `SellerProfile.PENDING` 기준으로 집계한다.
+- `marketplaceStatus.todaySellerSignupCount`는 당일 생성된 `SellerProfile` 기준으로 집계한다.
+- `marketplaceStatus.settlementPendingAmount`는 정산 도메인이 생기기 전까지 결제 이후 주문 금액 합계로 집계한다.
+- `marketplaceStatus.suspendedProductCount`는 현재 판매 중지에 대응되는 `ProductStatus.HIDDEN` 기준으로 집계한다.
+- 신고, 문의, 게시판, 정산 도메인은 관리자 운영용 최소 모델을 기준으로 집계하며 데이터가 없으면 `0` 또는 빈 목록을 응답한다.
 - `/admin/**`는 `ADMIN` 권한이 필요하다.
+
+### Admin Management
+
+관리자 운영 탭은 `/admin/**` API를 사용한다.
+
+- 회원 관리: 회원 목록 조회, 정지, 탈퇴 상태 처리
+- 판매자 관리: 판매자 목록 조회, 승인, 정지
+- 상품 관리: 전체 상품 목록 조회, 숨김, 복구, 삭제
+- 배너 관리: 배너 등록, 수정, 삭제
+- 기본 정책 관리: 정책 key 기준 저장
+- 게시판 관리: 게시글 등록, 수정, 삭제
+- 문의 관리: 문의 목록 조회와 답변 처리
+- 신고 관리: 상품/리뷰 신고 등록과 처리 완료
+- 정산 관리: 정산 대기 등록과 완료 처리
+
+현재 회원 삭제는 물리 삭제가 아니라 `MemberStatus.DELETED` 상태 변경이다. 정지 또는 삭제된 회원은
+로그인할 수 없다. 상품 삭제 API는 관리자 운영용 물리 삭제이며, 주문 등 다른 데이터가 참조하는 상품은
+DB 제약에 따라 실패할 수 있다.
 
 ## FE 연동 규칙
 
