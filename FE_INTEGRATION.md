@@ -192,10 +192,14 @@ PATCH  /admin/reports/{reportId}/resolve
 GET    /admin/settlements
 POST   /admin/settlements
 PATCH  /admin/settlements/{settlementId}/complete
+GET    /admin/audit-logs
 ```
 
 FE 관리자 탭은 목록 조회 시 로딩, 빈 상태, 에러 메시지를 표시한다. 상태 변경 버튼을 누르면 해당
 관리자 API를 호출한 뒤 현재 탭과 대시보드 현황을 다시 불러온다.
+목록 API는 `items`, `page`, `size`, `totalElements`, `totalPages` 페이지 응답으로 받으며,
+FE는 검색어, 상태 필터와 이전/다음 페이지 이동을 제공한다. 상품 삭제 버튼은 물리 삭제가 아니라
+숨김 처리 API로 동작한다.
 
 ## Product 연동
 

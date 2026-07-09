@@ -62,6 +62,7 @@ PATCH  /admin/reports/{reportId}/resolve
 GET    /admin/settlements
 POST   /admin/settlements
 PATCH  /admin/settlements/{settlementId}/complete
+GET    /admin/audit-logs
 ```
 
 - `/auth/**`는 인증 없이 접근한다.
@@ -261,10 +262,42 @@ Authorization: Bearer <ADMIN accessToken>
 - 문의 관리: 문의 목록 조회와 답변 처리
 - 신고 관리: 상품/리뷰 신고 등록과 처리 완료
 - 정산 관리: 정산 대기 등록과 완료 처리
+- 감사 로그: 관리자 작업 이력 조회
 
 현재 회원 삭제는 물리 삭제가 아니라 `MemberStatus.DELETED` 상태 변경이다. 정지 또는 삭제된 회원은
-로그인할 수 없다. 상품 삭제 API는 관리자 운영용 물리 삭제이며, 주문 등 다른 데이터가 참조하는 상품은
-DB 제약에 따라 실패할 수 있다.
+로그인할 수 없다. 상품 삭제 API는 물리 삭제가 아니라 `ProductStatus.HIDDEN` 숨김 처리로 동작한다.
+
+관리자 목록 API는 공통 query parameter를 지원한다.
+
+```text
+page=0
+size=10
+keyword=검색어
+status=상태값
+```
+
+목록 응답은 다음 페이지 포맷을 사용한다.
+
+```json
+{
+  "items": [],
+  "page": 0,
+  "size": 10,
+  "totalElements": 0,
+  "totalPages": 0
+}
+```
+
+리소스별 추가 필터:
+
+- `/admin/members`: `role`, `status`
+- `/admin/orders`: `status`
+- `/admin/products`: `status`
+- `/admin/banners`: `visible`
+- `/admin/boards`: `type`
+- `/admin/inquiries`: `status`
+- `/admin/reports`: `targetType`, `status`
+- `/admin/settlements`: `status`
 
 ## FE 연동 규칙
 
