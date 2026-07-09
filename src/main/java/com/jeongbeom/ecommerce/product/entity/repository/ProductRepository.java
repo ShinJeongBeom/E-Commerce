@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findBySellerProfile(SellerProfile sellerProfile);
 
     long countBySellerProfile(SellerProfile sellerProfile);
+
+    long countByCreatedAtBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
     @Query("""
         select p
