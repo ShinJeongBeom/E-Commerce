@@ -7,6 +7,7 @@ import com.jeongbeom.ecommerce.member.exception.MemberNotFoundException;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
 import com.jeongbeom.ecommerce.order.entity.OrderStatus;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
+import com.jeongbeom.ecommerce.product.entity.ProductStatus;
 import com.jeongbeom.ecommerce.product.entity.repository.ProductRepository;
 import com.jeongbeom.ecommerce.seller.entity.SellerApprovalStatus;
 import com.jeongbeom.ecommerce.seller.repository.SellerProfileRepository;
@@ -44,9 +45,10 @@ public class AdminDashboardService {
                         memberRepository.countByCreatedAtBetween(startDateTime, endDateTime),
                         0,
                         productRepository.countByCreatedAtBetween(startDateTime, endDateTime),
-                        0,
                         orderRepository.countByCreatedAtBetween(startDateTime, endDateTime)
                 );
+
+        long sellerApprovalWaitingCount = sellerProfileRepository.countByApprovalStatus(SellerApprovalStatus.PENDING);
 
         AdminDashboardResponse.PendingStatusResponse pendingStatus =
                 new AdminDashboardResponse.PendingStatusResponse(
@@ -54,8 +56,23 @@ public class AdminDashboardService {
                         0,
                         0,
                         0,
-                        sellerProfileRepository.countByApprovalStatus(SellerApprovalStatus.PENDING),
+                        sellerApprovalWaitingCount,
                         orderRepository.countByStatusIn(List.of(OrderStatus.CREATED, OrderStatus.PAID, OrderStatus.PREPARING))
+                );
+
+        AdminDashboardResponse.MarketplaceStatusResponse marketplaceStatus =
+                new AdminDashboardResponse.MarketplaceStatusResponse(
+                        sellerApprovalWaitingCount,
+                        sellerProfileRepository.countByCreatedAtBetween(startDateTime, endDateTime),
+                        orderRepository.sumTotalPriceByStatusIn(List.of(
+                                OrderStatus.PAID,
+                                OrderStatus.PREPARING,
+                                OrderStatus.SHIPPED,
+                                OrderStatus.DELIVERED
+                        )),
+                        0,
+                        0,
+                        productRepository.countByStatus(ProductStatus.HIDDEN)
                 );
 
         return new AdminDashboardResponse(
@@ -66,6 +83,7 @@ public class AdminDashboardService {
                 createQuickMenus(),
                 todayStatus,
                 pendingStatus,
+                marketplaceStatus,
                 createImprovementPosts(),
                 createManualPosts()
         );

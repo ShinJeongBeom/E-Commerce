@@ -177,7 +177,6 @@ Authorization: Bearer <ADMIN accessToken>
     "memberSignupCount": 0,
     "memberWithdrawalCount": 0,
     "productCreatedCount": 0,
-    "pageViewCount": 0,
     "orderCount": 0
   },
   "pendingStatus": {
@@ -187,6 +186,14 @@ Authorization: Bearer <ADMIN accessToken>
     "productInquiryCount": 0,
     "sellerApprovalCount": 0,
     "orderProcessingCount": 0
+  },
+  "marketplaceStatus": {
+    "sellerApprovalWaitingCount": 0,
+    "todaySellerSignupCount": 0,
+    "settlementPendingAmount": 0,
+    "reportedProductCount": 0,
+    "reportedReviewCount": 0,
+    "suspendedProductCount": 0
   },
   "improvementPosts": [
     {
@@ -206,6 +213,11 @@ Authorization: Bearer <ADMIN accessToken>
 ```
 
 - `todayStatus.memberSignupCount`, `productCreatedCount`, `orderCount`는 당일 `createdAt` 기준으로 집계한다.
+- `todayStatus.memberWithdrawalCount`는 탈퇴 상태 도메인이 생기기 전까지 기본값 `0`을 응답한다.
+- `marketplaceStatus.sellerApprovalWaitingCount`는 `SellerProfile.PENDING` 기준으로 집계한다.
+- `marketplaceStatus.todaySellerSignupCount`는 당일 생성된 `SellerProfile` 기준으로 집계한다.
+- `marketplaceStatus.settlementPendingAmount`는 정산 도메인이 생기기 전까지 결제 이후 주문 금액 합계로 집계한다.
+- `marketplaceStatus.suspendedProductCount`는 현재 판매 중지에 대응되는 `ProductStatus.HIDDEN` 기준으로 집계한다.
 - 신고, 문의, 게시판 도메인이 아직 없으므로 관련 카운트와 목록은 현재 관리자 메인 화면용 기본값이다.
 - `/admin/**`는 `ADMIN` 권한이 필요하다.
 

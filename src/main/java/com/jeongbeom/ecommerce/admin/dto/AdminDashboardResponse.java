@@ -13,6 +13,7 @@ public class AdminDashboardResponse {
     private final List<QuickMenuResponse> quickMenus;
     private final TodayStatusResponse todayStatus;
     private final PendingStatusResponse pendingStatus;
+    private final MarketplaceStatusResponse marketplaceStatus;
     private final List<BoardPostResponse> improvementPosts;
     private final List<BoardPostResponse> manualPosts;
 
@@ -24,6 +25,7 @@ public class AdminDashboardResponse {
             List<QuickMenuResponse> quickMenus,
             TodayStatusResponse todayStatus,
             PendingStatusResponse pendingStatus,
+            MarketplaceStatusResponse marketplaceStatus,
             List<BoardPostResponse> improvementPosts,
             List<BoardPostResponse> manualPosts
     ) {
@@ -34,6 +36,7 @@ public class AdminDashboardResponse {
         this.quickMenus = quickMenus;
         this.todayStatus = todayStatus;
         this.pendingStatus = pendingStatus;
+        this.marketplaceStatus = marketplaceStatus;
         this.improvementPosts = improvementPosts;
         this.manualPosts = manualPosts;
     }
@@ -54,20 +57,17 @@ public class AdminDashboardResponse {
         private final long memberSignupCount;
         private final long memberWithdrawalCount;
         private final long productCreatedCount;
-        private final long pageViewCount;
         private final long orderCount;
 
         public TodayStatusResponse(
                 long memberSignupCount,
                 long memberWithdrawalCount,
                 long productCreatedCount,
-                long pageViewCount,
                 long orderCount
         ) {
             this.memberSignupCount = memberSignupCount;
             this.memberWithdrawalCount = memberWithdrawalCount;
             this.productCreatedCount = productCreatedCount;
-            this.pageViewCount = pageViewCount;
             this.orderCount = orderCount;
         }
     }
@@ -95,6 +95,32 @@ public class AdminDashboardResponse {
             this.productInquiryCount = productInquiryCount;
             this.sellerApprovalCount = sellerApprovalCount;
             this.orderProcessingCount = orderProcessingCount;
+        }
+    }
+
+    @Getter
+    public static class MarketplaceStatusResponse {
+        private final long sellerApprovalWaitingCount;
+        private final long todaySellerSignupCount;
+        private final long settlementPendingAmount;
+        private final long reportedProductCount;
+        private final long reportedReviewCount;
+        private final long suspendedProductCount;
+
+        public MarketplaceStatusResponse(
+                long sellerApprovalWaitingCount,
+                long todaySellerSignupCount,
+                long settlementPendingAmount,
+                long reportedProductCount,
+                long reportedReviewCount,
+                long suspendedProductCount
+        ) {
+            this.sellerApprovalWaitingCount = sellerApprovalWaitingCount;
+            this.todaySellerSignupCount = todaySellerSignupCount;
+            this.settlementPendingAmount = settlementPendingAmount;
+            this.reportedProductCount = reportedProductCount;
+            this.reportedReviewCount = reportedReviewCount;
+            this.suspendedProductCount = suspendedProductCount;
         }
     }
 
