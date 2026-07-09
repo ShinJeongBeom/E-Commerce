@@ -105,6 +105,50 @@ FE는 `accessToken`을 저장하고, 인증 요청에서 다음 헤더를 사용
 Authorization: Bearer <accessToken>
 ```
 
+## Admin Dashboard 연동
+
+관리자 로그인 후 FE는 `role === "ADMIN"`이면 쇼핑몰 화면 대신 관리자 메인 화면으로 이동한다.
+
+```text
+GET /admin/dashboard
+Authorization: Bearer <accessToken>
+```
+
+현재 응답은 raw DTO다.
+
+```ts
+type AdminDashboardResponse = {
+  loginId: string
+  today: string
+  domainExpiresAt: string
+  domainDday: number
+  quickMenus: Array<{ label: string; target: string }>
+  todayStatus: {
+    memberSignupCount: number
+    memberWithdrawalCount: number
+    productCreatedCount: number
+    pageViewCount: number
+    orderCount: number
+  }
+  pendingStatus: {
+    productReportCount: number
+    exchangeRefundCount: number
+    oneToOneInquiryCount: number
+    productInquiryCount: number
+    sellerApprovalCount: number
+    orderProcessingCount: number
+  }
+  improvementPosts: Array<{ title: string; authorLoginId: string; createdDate: string }>
+  manualPosts: Array<{ title: string; authorLoginId: string; createdDate: string }>
+}
+```
+
+주의:
+
+- 관리자 메인 화면은 기존 쇼핑몰 레이아웃과 분리된 운영 콘솔로 렌더링한다.
+- 신고, 문의, 게시판 도메인은 아직 없으므로 관련 영역은 BE 기본값을 화면에 표시한다.
+- 관리자 API는 `ADMIN` 권한이 필요하며, 권한 실패 시 FE 에러 상태를 표시한다.
+
 ## Product 연동
 
 현재 BE `ProductResponse`:
