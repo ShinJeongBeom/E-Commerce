@@ -12,4 +12,5 @@ public interface SellerProfileRepository extends JpaRepository<SellerProfile, Lo
     Optional<SellerProfile> findByMember(Member member);
     boolean existsByMember(Member member);
     List<SellerProfile> findByApprovalStatus(SellerApprovalStatus approvalStatus);
+    long countByApprovalStatus(SellerApprovalStatus approvalStatus);
 }

@@ -30,11 +30,16 @@ POST   /orders/{orderId}/cancel
 GET    /orders/member/{memberId}
 POST   /orders/cart
 POST   /orders/cart/items
+
+GET    /admin/dashboard
+GET    /admin/sellers
+PATCH  /admin/sellers/{sellerProfileId}/approve
+PATCH  /admin/sellers/{sellerProfileId}/suspend
 ```
 
 - `/auth/**`는 인증 없이 접근한다.
 - `GET /products/**`는 인증 없이 접근한다.
-- 상품 등록·수정·삭제는 현재 `ADMIN` 권한이 필요하다.
+- 상품 등록·수정·삭제는 현재 `SELLER` 또는 `ADMIN` 권한이 필요하다.
 - 장바구니와 주문 API는 JWT 인증이 필요하다.
 - 현재 성공 응답은 `ApiResponse.payload`로 감싸지 않는다. Controller별 raw DTO, 문자열 또는 empty body를 반환한다.
 
@@ -144,6 +149,65 @@ true
   "address": "서울시 강남구"
 }
 ```
+
+### Admin Dashboard
+
+`GET /admin/dashboard`
+
+요청 헤더:
+
+```text
+Authorization: Bearer <ADMIN accessToken>
+```
+
+성공 응답:
+
+```json
+{
+  "loginId": "admin",
+  "today": "2026-07-09",
+  "domainExpiresAt": "2026-12-31",
+  "domainDday": 175,
+  "quickMenus": [
+    { "label": "정책관리", "target": "policy" },
+    { "label": "통계", "target": "statistics" },
+    { "label": "상품등록", "target": "products" }
+  ],
+  "todayStatus": {
+    "memberSignupCount": 0,
+    "memberWithdrawalCount": 0,
+    "productCreatedCount": 0,
+    "pageViewCount": 0,
+    "orderCount": 0
+  },
+  "pendingStatus": {
+    "productReportCount": 0,
+    "exchangeRefundCount": 0,
+    "oneToOneInquiryCount": 0,
+    "productInquiryCount": 0,
+    "sellerApprovalCount": 0,
+    "orderProcessingCount": 0
+  },
+  "improvementPosts": [
+    {
+      "title": "게시판 에디터 변경 요청",
+      "authorLoginId": "admin02",
+      "createdDate": "2026-07-01"
+    }
+  ],
+  "manualPosts": [
+    {
+      "title": "상품 교환 처리 프로세스",
+      "authorLoginId": "admin02",
+      "createdDate": "2026-07-01"
+    }
+  ]
+}
+```
+
+- `todayStatus.memberSignupCount`, `productCreatedCount`, `orderCount`는 당일 `createdAt` 기준으로 집계한다.
+- 신고, 문의, 게시판 도메인이 아직 없으므로 관련 카운트와 목록은 현재 관리자 메인 화면용 기본값이다.
+- `/admin/**`는 `ADMIN` 권한이 필요하다.
 
 ## FE 연동 규칙
 

@@ -1,5 +1,46 @@
 # Plans Guide
 
+# Plan: 관리자 메인 대시보드
+
+## 목표
+- 첨부된 관리자 메인 화면 구조에 맞춰 ADMIN 로그인 후 관리자 콘솔을 표시한다.
+- BE는 관리자 메인에 필요한 집계 데이터를 `/admin/dashboard`로 제공한다.
+- FE는 기존 쇼핑몰 화면 구성은 유지하고, ADMIN 계정만 관리자 메인 화면으로 분기한다.
+
+## 현재 상태
+- 현재 브랜치: BE/FE `feature/admin-main-dashboard`
+- 관련 저장소: BE `/Users/shinjeongbeom/SpringProject/E-Commerce`, FE `/Users/shinjeongbeom/Java/SpringProject/E-Commerce-FE`
+- 기존 구현: BE는 `/admin/sellers`와 판매자 승인 API가 있고, FE develop은 관리자 화면이 없다.
+- 제약: `/api/v1` 전환과 `ApiResponse.payload` 전환은 이번 작업에서 제외한다.
+
+## 범위
+- 포함: `/admin/dashboard` API, 관리자 메인 FE 화면, ADMIN 로그인 화면 분기, API 문서 갱신
+- 제외: 실제 게시판·문의·신고 도메인 구현, 관리자 메뉴별 상세 페이지, 운영 배포
+
+## 작업 순서
+1. 조사: 하네스 문서, 현재 BE/FE 브랜치와 관리자 관련 코드 확인
+2. 구현: BE 관리자 대시보드 DTO/Service/Controller 추가
+3. 구현: FE 관리자 대시보드 화면과 로그인 role 분기 추가
+4. 문서: `api.md`, `FE_INTEGRATION.md` 갱신
+5. 테스트: BE test, FE lint/build 실행
+6. 커밋: BE/FE 의도 단위로 분리
+
+## 검증
+- 실행할 명령: `./gradlew test`
+- 실행할 명령: `npm run lint`
+- 실행할 명령: `npm run build`
+- 확인할 API: `GET /admin/dashboard`
+- 수동 확인: ADMIN 로그인 시 관리자 메인 화면 진입
+
+## 커밋 분리
+- `feat : #1 관리자 메인 대시보드 API 추가`
+- `feat : #1 관리자 메인 화면 추가`
+- `chore : #1 관리자 메인 API 계약 문서화`
+
+## 리스크
+- 남은 위험: 게시판, 문의, 신고 도메인이 아직 없어 일부 카운트와 목록은 기본값이다.
+- 롤백 방법: 각 저장소에서 해당 브랜치 커밋을 revert하거나 develop 브랜치로 전환한다.
+
 ## 목적
 
 `PLANS.md`는 매 작업을 시작하기 전에 목표, 범위, 순서, 검증 방법을 고정하는 실행 계획서다.
