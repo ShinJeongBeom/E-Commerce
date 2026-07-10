@@ -2,11 +2,17 @@ package com.jeongbeom.ecommerce.admin.controller;
 
 import com.jeongbeom.ecommerce.admin.dto.AdminManagementRequest;
 import com.jeongbeom.ecommerce.admin.dto.AdminManagementResponse;
+import com.jeongbeom.ecommerce.admin.entity.AdminInquiryStatus;
 import com.jeongbeom.ecommerce.admin.entity.AdminPostType;
+import com.jeongbeom.ecommerce.admin.entity.AdminReportStatus;
 import com.jeongbeom.ecommerce.admin.entity.AdminReportTargetType;
+import com.jeongbeom.ecommerce.admin.entity.AdminSettlementStatus;
 import com.jeongbeom.ecommerce.admin.service.AdminManagementService;
+import com.jeongbeom.ecommerce.member.entity.MemberStatus;
 import com.jeongbeom.ecommerce.order.dto.OrderResponseDto;
+import com.jeongbeom.ecommerce.order.entity.OrderStatus;
 import com.jeongbeom.ecommerce.product.dto.ProductResponse;
+import com.jeongbeom.ecommerce.product.entity.ProductStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,87 +36,118 @@ public class AdminManagementController {
     private final AdminManagementService adminManagementService;
 
     @GetMapping("/orders")
-    public List<OrderResponseDto> getOrders() {
-        return adminManagementService.getOrders();
+    public AdminManagementResponse.PageResponse<OrderResponseDto> getOrders(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return adminManagementService.getOrders(keyword, status, page, size);
     }
 
     @GetMapping("/members")
-    public List<AdminManagementResponse.MemberResponse> getMembers() {
-        return adminManagementService.getMembers();
+    public AdminManagementResponse.PageResponse<AdminManagementResponse.MemberResponse> getMembers(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) MemberStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return adminManagementService.getMembers(keyword, role, status, page, size);
     }
 
     @PatchMapping("/members/{memberId}/suspend")
-    public AdminManagementResponse.MemberResponse suspendMember(@PathVariable Long memberId) {
-        return adminManagementService.suspendMember(memberId);
+    public AdminManagementResponse.MemberResponse suspendMember(Authentication authentication, @PathVariable Long memberId) {
+        return adminManagementService.suspendMember(getMemberId(authentication), memberId);
     }
 
     @DeleteMapping("/members/{memberId}")
-    public AdminManagementResponse.MemberResponse deleteMember(@PathVariable Long memberId) {
-        return adminManagementService.deleteMember(memberId);
+    public AdminManagementResponse.MemberResponse deleteMember(Authentication authentication, @PathVariable Long memberId) {
+        return adminManagementService.deleteMember(getMemberId(authentication), memberId);
     }
 
     @GetMapping("/products")
-    public List<ProductResponse> getProducts() {
-        return adminManagementService.getProducts();
+    public AdminManagementResponse.PageResponse<ProductResponse> getProducts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) ProductStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return adminManagementService.getProducts(keyword, status, page, size);
     }
 
     @PatchMapping("/products/{productId}/hide")
-    public ProductResponse hideProduct(@PathVariable Long productId) {
-        return adminManagementService.hideProduct(productId);
+    public ProductResponse hideProduct(Authentication authentication, @PathVariable Long productId) {
+        return adminManagementService.hideProduct(getMemberId(authentication), productId);
     }
 
     @PatchMapping("/products/{productId}/restore")
-    public ProductResponse restoreProduct(@PathVariable Long productId) {
-        return adminManagementService.restoreProduct(productId);
+    public ProductResponse restoreProduct(Authentication authentication, @PathVariable Long productId) {
+        return adminManagementService.restoreProduct(getMemberId(authentication), productId);
     }
 
     @DeleteMapping("/products/{productId}")
-    public void deleteProduct(@PathVariable Long productId) {
-        adminManagementService.deleteProduct(productId);
+    public ProductResponse deleteProduct(Authentication authentication, @PathVariable Long productId) {
+        return adminManagementService.deleteProduct(getMemberId(authentication), productId);
     }
 
     @GetMapping("/banners")
-    public List<AdminManagementResponse.BannerResponse> getBanners() {
-        return adminManagementService.getBanners();
+    public AdminManagementResponse.PageResponse<AdminManagementResponse.BannerResponse> getBanners(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean visible,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return adminManagementService.getBanners(keyword, visible, page, size);
     }
 
     @PostMapping("/banners")
     public AdminManagementResponse.BannerResponse createBanner(
+            Authentication authentication,
             @RequestBody AdminManagementRequest.BannerUpsertRequest request
     ) {
-        return adminManagementService.createBanner(request);
+        return adminManagementService.createBanner(getMemberId(authentication), request);
     }
 
     @PutMapping("/banners/{bannerId}")
     public AdminManagementResponse.BannerResponse updateBanner(
+            Authentication authentication,
             @PathVariable Long bannerId,
             @RequestBody AdminManagementRequest.BannerUpsertRequest request
     ) {
-        return adminManagementService.updateBanner(bannerId, request);
+        return adminManagementService.updateBanner(getMemberId(authentication), bannerId, request);
     }
 
     @DeleteMapping("/banners/{bannerId}")
-    public void deleteBanner(@PathVariable Long bannerId) {
-        adminManagementService.deleteBanner(bannerId);
+    public void deleteBanner(Authentication authentication, @PathVariable Long bannerId) {
+        adminManagementService.deleteBanner(getMemberId(authentication), bannerId);
     }
 
     @GetMapping("/policies")
-    public List<AdminManagementResponse.PolicyResponse> getPolicies() {
-        return adminManagementService.getPolicies();
+    public AdminManagementResponse.PageResponse<AdminManagementResponse.PolicyResponse> getPolicies(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return adminManagementService.getPolicies(keyword, page, size);
     }
 
     @PostMapping("/policies")
     public AdminManagementResponse.PolicyResponse savePolicy(
+            Authentication authentication,
             @RequestBody AdminManagementRequest.PolicyUpsertRequest request
     ) {
-        return adminManagementService.savePolicy(request);
+        return adminManagementService.savePolicy(getMemberId(authentication), request);
     }
 
     @GetMapping("/boards")
-    public List<AdminManagementResponse.PostResponse> getPosts(
-            @RequestParam(required = false) AdminPostType type
+    public AdminManagementResponse.PageResponse<AdminManagementResponse.PostResponse> getPosts(
+            @RequestParam(required = false) AdminPostType type,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        return adminManagementService.getPosts(type);
+        return adminManagementService.getPosts(type, keyword, page, size);
     }
 
     @PostMapping("/boards")
@@ -123,20 +160,26 @@ public class AdminManagementController {
 
     @PutMapping("/boards/{postId}")
     public AdminManagementResponse.PostResponse updatePost(
+            Authentication authentication,
             @PathVariable Long postId,
             @RequestBody AdminManagementRequest.PostUpsertRequest request
     ) {
-        return adminManagementService.updatePost(postId, request);
+        return adminManagementService.updatePost(getMemberId(authentication), postId, request);
     }
 
     @DeleteMapping("/boards/{postId}")
-    public void deletePost(@PathVariable Long postId) {
-        adminManagementService.deletePost(postId);
+    public void deletePost(Authentication authentication, @PathVariable Long postId) {
+        adminManagementService.deletePost(getMemberId(authentication), postId);
     }
 
     @GetMapping("/inquiries")
-    public List<AdminManagementResponse.InquiryResponse> getInquiries() {
-        return adminManagementService.getInquiries();
+    public AdminManagementResponse.PageResponse<AdminManagementResponse.InquiryResponse> getInquiries(
+            @RequestParam(required = false) AdminInquiryStatus status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return adminManagementService.getInquiries(status, keyword, page, size);
     }
 
     @PostMapping("/inquiries")
@@ -149,46 +192,67 @@ public class AdminManagementController {
 
     @PatchMapping("/inquiries/{inquiryId}/answer")
     public AdminManagementResponse.InquiryResponse answerInquiry(
+            Authentication authentication,
             @PathVariable Long inquiryId,
             @RequestBody AdminManagementRequest.InquiryAnswerRequest request
     ) {
-        return adminManagementService.answerInquiry(inquiryId, request);
+        return adminManagementService.answerInquiry(getMemberId(authentication), inquiryId, request);
     }
 
     @GetMapping("/reports")
-    public List<AdminManagementResponse.ReportResponse> getReports(
-            @RequestParam(required = false) AdminReportTargetType targetType
+    public AdminManagementResponse.PageResponse<AdminManagementResponse.ReportResponse> getReports(
+            @RequestParam(required = false) AdminReportTargetType targetType,
+            @RequestParam(required = false) AdminReportStatus status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        return adminManagementService.getReports(targetType);
+        return adminManagementService.getReports(targetType, status, keyword, page, size);
     }
 
     @PostMapping("/reports")
     public AdminManagementResponse.ReportResponse createReport(
+            Authentication authentication,
             @RequestBody AdminManagementRequest.ReportCreateRequest request
     ) {
-        return adminManagementService.createReport(request);
+        return adminManagementService.createReport(getMemberId(authentication), request);
     }
 
     @PatchMapping("/reports/{reportId}/resolve")
-    public AdminManagementResponse.ReportResponse resolveReport(@PathVariable Long reportId) {
-        return adminManagementService.resolveReport(reportId);
+    public AdminManagementResponse.ReportResponse resolveReport(Authentication authentication, @PathVariable Long reportId) {
+        return adminManagementService.resolveReport(getMemberId(authentication), reportId);
     }
 
     @GetMapping("/settlements")
-    public List<AdminManagementResponse.SettlementResponse> getSettlements() {
-        return adminManagementService.getSettlements();
+    public AdminManagementResponse.PageResponse<AdminManagementResponse.SettlementResponse> getSettlements(
+            @RequestParam(required = false) AdminSettlementStatus status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return adminManagementService.getSettlements(status, keyword, page, size);
     }
 
     @PostMapping("/settlements")
     public AdminManagementResponse.SettlementResponse createSettlement(
+            Authentication authentication,
             @RequestBody AdminManagementRequest.SettlementCreateRequest request
     ) {
-        return adminManagementService.createSettlement(request);
+        return adminManagementService.createSettlement(getMemberId(authentication), request);
     }
 
     @PatchMapping("/settlements/{settlementId}/complete")
-    public AdminManagementResponse.SettlementResponse completeSettlement(@PathVariable Long settlementId) {
-        return adminManagementService.completeSettlement(settlementId);
+    public AdminManagementResponse.SettlementResponse completeSettlement(Authentication authentication, @PathVariable Long settlementId) {
+        return adminManagementService.completeSettlement(getMemberId(authentication), settlementId);
+    }
+
+    @GetMapping("/audit-logs")
+    public AdminManagementResponse.PageResponse<AdminManagementResponse.AuditLogResponse> getAuditLogs(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return adminManagementService.getAuditLogs(keyword, page, size);
     }
 
     private Long getMemberId(Authentication authentication) {

@@ -12,6 +12,23 @@ import lombok.Getter;
 public class AdminManagementResponse {
 
     @Getter
+    public static class PageResponse<T> {
+        private final java.util.List<T> items;
+        private final int page;
+        private final int size;
+        private final long totalElements;
+        private final int totalPages;
+
+        public PageResponse(java.util.List<T> items, int page, int size, long totalElements, int totalPages) {
+            this.items = items;
+            this.page = page;
+            this.size = size;
+            this.totalElements = totalElements;
+            this.totalPages = totalPages;
+        }
+    }
+
+    @Getter
     public static class MemberResponse {
         private final Long id;
         private final String loginId;
@@ -135,6 +152,29 @@ public class AdminManagementResponse {
             this.storeName = settlement.getSellerProfile().getStoreName();
             this.amount = settlement.getAmount();
             this.status = settlement.getStatus().name();
+        }
+    }
+
+    @Getter
+    public static class AuditLogResponse {
+        private final Long id;
+        private final Long adminMemberId;
+        private final String adminLoginId;
+        private final String action;
+        private final String targetType;
+        private final Long targetId;
+        private final String description;
+        private final String createdAt;
+
+        public AuditLogResponse(com.jeongbeom.ecommerce.admin.entity.AdminAuditLog auditLog) {
+            this.id = auditLog.getId();
+            this.adminMemberId = auditLog.getAdminMemberId();
+            this.adminLoginId = auditLog.getAdminLoginId();
+            this.action = auditLog.getAction();
+            this.targetType = auditLog.getTargetType();
+            this.targetId = auditLog.getTargetId();
+            this.description = auditLog.getDescription();
+            this.createdAt = auditLog.getCreatedAt() == null ? null : auditLog.getCreatedAt().toString();
         }
     }
 }
