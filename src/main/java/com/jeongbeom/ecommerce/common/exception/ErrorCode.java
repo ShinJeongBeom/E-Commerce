@@ -23,7 +23,11 @@ public enum ErrorCode {
     SELLER_ACCESS_DENIED(HttpStatus.FORBIDDEN, "판매자 권한이 필요합니다."),
     SELLER_NOT_APPROVED(HttpStatus.FORBIDDEN, "승인된 판매자만 사용할 수 있습니다."),
     PRODUCT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "본인의 상품만 처리할 수 있습니다."),
-    ORDER_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "이미 취소된 주문입니다.");
+    ORDER_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "이미 취소된 주문입니다."),
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제 금액이 주문 금액과 일치하지 않습니다."),
+    PAYMENT_ALREADY_CONFIRMED(HttpStatus.BAD_REQUEST, "이미 승인된 결제입니다."),
+    PAYMENT_SECRET_KEY_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "결제 시크릿 키가 설정되지 않았습니다."),
+    PAYMENT_CONFIRM_FAILED(HttpStatus.BAD_REQUEST, "결제 승인에 실패했습니다.");
 
     private final HttpStatus status;
     private final String message;
