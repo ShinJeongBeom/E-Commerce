@@ -1,6 +1,7 @@
 package com.jeongbeom.ecommerce.order.controller;
 
 import com.jeongbeom.ecommerce.order.dto.CartOrderRequest;
+import com.jeongbeom.ecommerce.order.dto.OrderCheckoutResponse;
 import com.jeongbeom.ecommerce.order.dto.OrderCreateRequestDto;
 import com.jeongbeom.ecommerce.order.dto.OrderResponseDto;
 import com.jeongbeom.ecommerce.order.service.OrderService;
@@ -65,5 +66,15 @@ public class OrderController {
         orderService.createOrderFromCartItems(memberId, request);
 
         return ResponseEntity.ok("선택 장바구니 상품 주문이 완료되었습니다.");
+    }
+
+    // 결제용 주문 생성
+    @PostMapping("/checkout")
+    public ResponseEntity<OrderCheckoutResponse> checkout(
+            Authentication authentication,
+            @RequestBody CartOrderRequest request
+    ) {
+        Long memberId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(orderService.checkout(memberId, request));
     }
 }
