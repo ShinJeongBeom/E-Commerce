@@ -41,7 +41,7 @@ public class SellerCenterService {
 
         List<OrderItem> sellerOrderItems = getSellerOrderItems(profile);
         int totalSales = sellerOrderItems.stream()
-                .filter(orderItem -> orderItem.getOrder().getStatus() != OrderStatus.CANCELLED)
+                .filter(orderItem -> isPaidOrder(orderItem.getOrder()))
                 .mapToInt(this::calculateOrderItemTotalPrice)
                 .sum();
 
@@ -107,10 +107,12 @@ public class SellerCenterService {
 
         List<OrderItem> sellerOrderItems = getSellerOrderItems(profile);
         int totalSales = sellerOrderItems.stream()
-                .filter(orderItem -> orderItem.getOrder().getStatus() != OrderStatus.CANCELLED)
+                .filter(orderItem -> isPaidOrder(orderItem.getOrder()))
                 .mapToInt(this::calculateOrderItemTotalPrice)
                 .sum();
-        int orderCount = getSellerOrders(sellerOrderItems).size();
+        int orderCount = (int) getSellerOrders(sellerOrderItems).stream()
+                .filter(this::isPaidOrder)
+                .count();
         int averageOrderAmount = orderCount == 0 ? 0 : totalSales / orderCount;
 
         return new SellerSalesResponse(totalSales, totalSales, orderCount, averageOrderAmount);
@@ -171,5 +173,12 @@ public class SellerCenterService {
 
     private int calculateOrderItemTotalPrice(OrderItem orderItem) {
         return orderItem.getOrderPrice() * orderItem.getOrderQuantity();
+    }
+
+    private boolean isPaidOrder(Order order) {
+        return order.getStatus() == OrderStatus.PAID
+                || order.getStatus() == OrderStatus.PREPARING
+                || order.getStatus() == OrderStatus.SHIPPED
+                || order.getStatus() == OrderStatus.DELIVERED;
     }
 }

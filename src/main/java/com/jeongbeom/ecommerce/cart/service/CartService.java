@@ -75,12 +75,15 @@ public class CartService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow((MemberNotFoundException::new));
 
-        // 회원의 장바구니 조회
-        Cart cart = cartRepository.findByMember(member)
-                .orElseThrow(() -> new RuntimeException("장바구니 없음"));
+        // 회원의 장바구니가 아직 없으면 빈 장바구니로 응답한다.
+        Optional<Cart> cart = cartRepository.findByMember(member);
+
+        if (cart.isEmpty()) {
+            return List.of();
+        }
 
         // CartItem조회
-        List<CartItem> cartItems = cartItemRepository.findByCart(cart);
+        List<CartItem> cartItems = cartItemRepository.findByCart(cart.get());
 
         // DTO 반환
         return cartItems.stream()
