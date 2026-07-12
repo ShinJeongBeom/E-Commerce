@@ -10,6 +10,7 @@ import com.jeongbeom.ecommerce.member.entity.Member;
 import com.jeongbeom.ecommerce.member.exception.MemberNotFoundException;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
 import com.jeongbeom.ecommerce.order.dto.CartOrderRequest;
+import com.jeongbeom.ecommerce.order.dto.OrderCheckoutResponse;
 import com.jeongbeom.ecommerce.order.dto.OrderCreateRequestDto;
 import com.jeongbeom.ecommerce.order.dto.OrderResponseDto;
 import com.jeongbeom.ecommerce.order.entity.Order;
@@ -126,6 +127,12 @@ public class OrderService {
     //장바구니 선택 주문
     @Transactional
     public void createOrderFromCartItems(Long memberId, CartOrderRequest request) {
+        checkoutFromCartItems(memberId, request);
+    }
+
+    //결제용 장바구니 선택 주문 생성
+    @Transactional
+    public OrderCheckoutResponse checkoutFromCartItems(Long memberId, CartOrderRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
 
@@ -175,11 +182,23 @@ public class OrderService {
         savedOrder.changeTotalPrice(totalPrice);
 
         cartItemRepository.deleteAll(cartItems);
+
+        return new OrderCheckoutResponse(
+                savedOrder.getOrderNumber(),
+                createOrderName(cartItems),
+                totalPrice
+        );
     }
 
     //전체 장바구니 주문
     @Transactional
     public void createOrderFromCart(Long memberId, CartOrderRequest request) {
+        checkoutFromCart(memberId, request);
+    }
+
+    //결제용 장바구니 전체 주문 생성
+    @Transactional
+    public OrderCheckoutResponse checkoutFromCart(Long memberId, CartOrderRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
 
@@ -201,8 +220,28 @@ public class OrderService {
                 request.getAddress()
         );
 
-        createOrderFromCartItems(memberId, cartOrderRequest);
+        return checkoutFromCartItems(memberId, cartOrderRequest);
     }
 
+    //결제용 주문 생성
+    @Transactional
+    public OrderCheckoutResponse checkout(Long memberId, CartOrderRequest request) {
+        if (request.getCartItemIds() == null || request.getCartItemIds().isEmpty()) {
+            return checkoutFromCart(memberId, request);
+        }
+
+        return checkoutFromCartItems(memberId, request);
+    }
+
+    private String createOrderName(List<CartItem> cartItems) {
+        String firstProductName = cartItems.get(0).getProduct().getName();
+        int otherCount = cartItems.size() - 1;
+
+        if (otherCount == 0) {
+            return firstProductName;
+        }
+
+        return firstProductName + " 외 " + otherCount + "건";
+    }
 
 }
