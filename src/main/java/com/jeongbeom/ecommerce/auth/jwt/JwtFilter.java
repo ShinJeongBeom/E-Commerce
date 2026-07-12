@@ -3,11 +3,14 @@ package com.jeongbeom.ecommerce.auth.jwt;
 import com.jeongbeom.ecommerce.member.entity.Member;
 import com.jeongbeom.ecommerce.member.exception.MemberNotFoundException;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -43,7 +46,18 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            Long memberId = jwtUtil.getMemberId(token);
+            Long memberId;
+
+            try {
+                memberId = jwtUtil.getMemberId(token);
+            } catch (JwtException | IllegalArgumentException e) {
+                SecurityContextHolder.clearContext();
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                response.setCharacterEncoding("UTF-8");
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.getWriter().write("{\"code\":\"INVALID_TOKEN\",\"message\":\"로그인이 만료되었습니다. 다시 로그인해주세요.\"}");
+                return;
+            }
 
             //memberId로 회원 조회
             Member member = memberRepository.findById(memberId)
