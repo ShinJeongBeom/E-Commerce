@@ -27,13 +27,16 @@ public enum ErrorCode {
     PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제 금액이 주문 금액과 일치하지 않습니다."),
     PAYMENT_ALREADY_CONFIRMED(HttpStatus.BAD_REQUEST, "이미 승인된 결제입니다."),
     PAYMENT_SECRET_KEY_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "결제 시크릿 키가 설정되지 않았습니다."),
-    PAYMENT_CONFIRM_FAILED(HttpStatus.BAD_REQUEST, "결제 승인에 실패했습니다.");
+    PAYMENT_CONFIRM_FAILED(HttpStatus.BAD_REQUEST, "결제 승인에 실패했습니다."),
+    INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, "허용되지 않는 이미지 파일입니다."),
+    IMAGE_UPLOAD_NOT_FOUND(HttpStatus.NOT_FOUND, "업로드한 이미지를 확인할 수 없습니다."),
+    FILE_UPLOAD_FAIL_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 준비에 실패했습니다.");
 
-    private final HttpStatus status;
-    private final String message;
+    private final HttpStatus status;    // HTTP 상태 코드를 스프링에서 쉽게 작성하기 위한 enum값들의 모임
+    private final String message;       // 에러 메세지
 
     ErrorCode(HttpStatus status, String message) {
-        this.status = status;
+        this.status = status;           // HTTP 상태 코드에서 404와 같은 숫자 값만 반환해 주기 위한 메소드
         this.message = message;
     }
 

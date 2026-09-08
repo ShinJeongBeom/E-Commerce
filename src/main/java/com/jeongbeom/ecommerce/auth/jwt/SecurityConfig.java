@@ -27,6 +27,7 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/products/**").permitAll()        // 상품 조회는 누구나 가능
                         .requestMatchers(HttpMethod.POST, "/products").hasAnyRole("SELLER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/products/images/**").hasAnyRole("SELLER", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/products/**").hasAnyRole("SELLER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/products/**").hasAnyRole("SELLER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")

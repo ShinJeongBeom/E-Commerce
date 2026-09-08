@@ -81,6 +81,9 @@ ecommerce:idempotency:order:<key>
 
 ## AWS S3 이미지
 
+- 상품 이미지 업로드는 백엔드 multipart 중계를 사용하지 않고 Presigned PUT URL 방식으로 처리한다.
+- Presigned URL은 인증된 판매자 또는 관리자에게만 발급하며 object key에 회원 식별 경로를 포함한다.
+- URL 만료시간은 10분으로 제한하고, 완료 API에서 object key 소유권과 실제 S3 metadata를 검증한다.
 - 이미지 바이너리는 DB에 저장하지 않고 S3의 `object_key`와 `image_url`만 저장한다.
 - MIME type, 확장자, 크기와 이미지 개수를 서버에서 검증한다.
 - 객체 키는 서버에서 생성하고 원본 파일명과 경로 입력을 신뢰하지 않는다.
@@ -89,3 +92,20 @@ ecommerce:idempotency:order:<key>
 - 이미지 교체·삭제 실패는 추적하고 재처리할 수 있게 한다.
 - 상품당 대표 이미지는 하나만 허용하며 정렬 순서 정책을 둔다.
 - AWS 자격 증명과 버킷 정보는 환경변수나 배포 비밀 저장소에서 주입한다.
+- 브라우저 업로드를 위해 S3 CORS는 허용할 FE origin과 `PUT`, `Content-Type`만 최소 범위로 설정한다.
+
+로컬 FE 직접 업로드에 필요한 S3 CORS 예시:
+
+```json
+[
+  {
+    "AllowedHeaders": ["Content-Type"],
+    "AllowedMethods": ["PUT"],
+    "AllowedOrigins": ["http://localhost:5173"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+운영에서는 `AllowedOrigins`를 실제 HTTPS FE origin으로 교체하고 `*`를 사용하지 않는다.
