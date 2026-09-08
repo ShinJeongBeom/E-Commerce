@@ -203,6 +203,20 @@ FE는 검색어, 상태 필터와 이전/다음 페이지 이동을 제공한다
 
 ## Product 연동
 
+### 상품 이미지 직접 업로드
+
+판매자 상품 폼에서 이미지 파일을 선택하면 다음 순서로 처리한다.
+
+1. 파일 타입과 5MB 크기 제한을 FE에서 먼저 확인한다.
+2. JWT를 포함해 `POST /products/images/presigned`를 호출한다.
+3. 응답의 `uploadUrl`로 이미지 바이너리를 직접 `PUT`한다.
+4. S3 업로드 성공 후 JWT를 포함해 `POST /products/images/complete`를 호출한다.
+5. 응답의 `imageUrl`을 상품 생성·수정 요청에 넣는다.
+
+S3 `PUT` 요청에는 JWT를 보내지 않고 발급 요청에서 사용한 것과 같은 `Content-Type`만 보낸다.
+브라우저 직접 업로드를 위해 S3 버킷 CORS에 FE origin, `PUT`, `Content-Type`을 허용해야 한다.
+S3 업로드나 완료 검증이 실패하면 상품 폼 제출을 막고 사용자에게 재시도 메시지를 표시한다.
+
 현재 BE `ProductResponse`:
 
 ```ts

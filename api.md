@@ -19,6 +19,8 @@ GET    /products/{productId}
 POST   /products
 PUT    /products/{productId}
 DELETE /products/{productId}
+POST   /products/images/presigned
+POST   /products/images/complete
 
 GET    /cart
 POST   /cart
@@ -140,6 +142,56 @@ true
   "status": "ON_SALE"
 }
 ```
+
+### Product Image
+
+상품 이미지는 백엔드 multipart 업로드가 아니라 Presigned URL을 이용해 S3로 직접 업로드한다.
+두 API 모두 `SELLER` 또는 `ADMIN` 권한과 JWT가 필요하다.
+
+`POST /products/images/presigned`
+
+```json
+{
+  "contentType": "image/webp",
+  "fileSize": 204800
+}
+```
+
+성공 응답:
+
+```json
+{
+  "uploadUrl": "https://bucket.s3.ap-northeast-2.amazonaws.com/products/7/uuid.webp?...",
+  "objectKey": "products/7/uuid.webp",
+  "expiresAt": "2026-09-03T00:10:00Z"
+}
+```
+
+- 지원 타입: `image/jpeg`, `image/png`, `image/webp`
+- 최대 크기: 5MB
+- 발급된 URL의 유효시간: 10분
+- 클라이언트는 발급 요청과 동일한 `Content-Type` 헤더로 S3에 `PUT`한다.
+
+S3 업로드 성공 후 `POST /products/images/complete`를 호출한다.
+
+```json
+{
+  "objectKey": "products/7/uuid.webp"
+}
+```
+
+백엔드는 로그인 사용자의 경로인지 확인하고 S3 객체의 실제 크기와 콘텐츠 타입을 검증한다.
+성공 응답:
+
+```json
+{
+  "imageUrl": "https://cdn.example.com/products/7/uuid.webp",
+  "objectKey": "products/7/uuid.webp"
+}
+```
+
+`imageUrl`은 상품 등록·수정 요청에 사용한다. `cloud.aws.s3.public-base-url`이 설정되어 있으면
+해당 CDN base URL을 사용하고, 설정되지 않으면 S3 객체 URL을 반환한다.
 
 ### Cart
 

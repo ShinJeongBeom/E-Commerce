@@ -1,5 +1,46 @@
 # Plans Guide
 
+# Plan: Presigned URL 기반 S3 상품 이미지 직접 업로드
+
+## 목표
+- 상품 이미지 바이너리가 백엔드 서버를 통과하지 않고 브라우저에서 S3로 직접 업로드된다.
+- 백엔드는 인증된 판매자/관리자에게 짧은 만료시간의 업로드 URL만 발급한다.
+- 업로드 완료 시 S3 객체의 크기와 콘텐츠 타입을 검증한 뒤 상품에 사용할 이미지 URL을 반환한다.
+
+## 현재 상태
+- 현재 브랜치: BE/FE `feature/s3-product-image-upload`
+- 관련 저장소: BE `/Users/shinjeongbeom/SpringProject/E-Commerce`, FE `/Users/shinjeongbeom/Java/SpringProject/E-Commerce-FE`
+- 기존 구현: FE multipart 요청을 BE가 받아 동기적으로 S3에 업로드한다.
+- 제약: S3 버킷 CORS와 IAM 정책 변경, CloudFront 배포, 미사용 객체 정리 작업은 이번 코드 변경에서 제외한다.
+
+## 범위
+- 포함: Presigned PUT URL 발급, 소유자별 object key, 업로드 완료 검증, FE 직접 업로드, API 문서와 테스트
+- 제외: 상품 이미지 별도 Entity, 다중 이미지, 리사이징, 바이러스 검사, 운영 AWS 정책 변경
+
+## 작업 순서
+1. 기존 BE multipart API와 FE 호출 흐름 확인
+2. S3 저장소 인터페이스와 Presigned URL 구현
+3. 발급·완료 API와 검증 로직 구현
+4. FE 직접 PUT 업로드 연동
+5. 단위 테스트, BE 빌드, FE lint/build 검증
+6. API·연동·S3 운영 문서 갱신
+
+## 검증
+- `./gradlew test --tests 'com.jeongbeom.ecommerce.image.ProductImageServiceTest'`
+- `./gradlew build`
+- `npm run lint`
+- `npm run build`
+- AWS 연결 수동 확인: URL 발급 → S3 PUT → 완료 확인 → 이미지 URL 렌더링
+
+## 커밋 분리
+- `feat : #<issue-number> Presigned URL 상품 이미지 업로드 API 추가`
+- `feat : #<issue-number> S3 상품 이미지 직접 업로드 연동`
+- `docs : #<issue-number> 상품 이미지 업로드 계약 문서화`
+
+## 리스크
+- 남은 위험: 브라우저 PUT을 허용하는 S3 CORS 설정과 객체 조회 정책이 배포 환경에 필요하다.
+- 롤백 방법: 두 저장소에서 Presigned 업로드 커밋을 revert하고 기존 multipart API로 복원한다.
+
 # Plan: 관리자 메인 대시보드
 
 ## 목표
