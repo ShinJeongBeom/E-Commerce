@@ -122,11 +122,21 @@ public class Product extends BaseTimeEntity {
         }
 
         this.stock -= quantity;
+        if (this.stock == 0 && this.status == ProductStatus.ON_SALE) {
+            this.status = ProductStatus.SOLD_OUT;
+        }
     }
 
     // 재고 증가
     public void increaseStock(int quantity){
-        this.stock += quantity;
+        if (quantity <= 0) {
+            throw new InvalidStockQuantityException();
+        }
+
+        this.stock = Math.addExact(this.stock, quantity);
+        if (this.status == ProductStatus.SOLD_OUT) {
+            this.status = ProductStatus.ON_SALE;
+        }
     }
 
 
