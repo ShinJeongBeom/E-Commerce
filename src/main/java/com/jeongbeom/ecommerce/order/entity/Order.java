@@ -2,6 +2,8 @@ package com.jeongbeom.ecommerce.order.entity;
 
 import com.jeongbeom.ecommerce.common.entity.BaseTimeEntity;
 import com.jeongbeom.ecommerce.member.entity.Member;
+import com.jeongbeom.ecommerce.order.exception.InvalidOrderStatusTransitionException;
+import com.jeongbeom.ecommerce.order.exception.OrderAlreadyCancelledException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +23,7 @@ public class Order extends BaseTimeEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, length = 40)
     private String orderNumber;
 
     @Column(nullable = false)
@@ -51,7 +53,17 @@ public class Order extends BaseTimeEntity {
     }
 
     public void changeStatus(OrderStatus status) {
+        if (!this.status.canTransitionTo(status)) {
+            throw new InvalidOrderStatusTransitionException();
+        }
         this.status = status;
+    }
+
+    public void cancel() {
+        if (status == OrderStatus.CANCELLED) {
+            throw new OrderAlreadyCancelledException();
+        }
+        changeStatus(OrderStatus.CANCELLED);
     }
 
     //총액 변경 매서드

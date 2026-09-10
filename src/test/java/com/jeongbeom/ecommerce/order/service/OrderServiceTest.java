@@ -18,6 +18,8 @@ import com.jeongbeom.ecommerce.product.entity.LightRequirement;
 import com.jeongbeom.ecommerce.product.entity.ProductStatus;
 import com.jeongbeom.ecommerce.product.entity.WateringCycle;
 import com.jeongbeom.ecommerce.product.entity.repository.ProductRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,9 @@ class OrderServiceTest {
 
     @Autowired
     private OrderItemRepository orderItemRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Test
     @DisplayName("주문 생성 시 주문과 주문상품이 저장되고 재고가 감소한다")
@@ -115,6 +120,74 @@ class OrderServiceTest {
         assertThat(savedOrderItem.getOrderPrice()).isEqualTo(5000);
 
         assertThat(foundProduct.getStock()).isEqualTo(8);
+    }
+
+    @Test
+    @DisplayName("상품 정보가 변경되어도 주문 당시 상품명과 가격 스냅샷은 유지된다")
+    void 주문_상품_스냅샷_유지_테스트() {
+        Member member = memberRepository.save(
+                new Member(
+                        "snapshot" + System.currentTimeMillis() + "@test.com",
+                        "1234",
+                        "010-1111-2222",
+                        Role.USER
+                )
+        );
+
+        Product product = productRepository.save(
+                new Product(
+                        "주문 당시 상품명",
+                        "다육식물",
+                        CareLevel.NORMAL,
+                        LightRequirement.MEDIUM,
+                        WateringCycle.WEEKLY,
+                        "https://example.com/original.jpg",
+                        "화분 포함",
+                        "상품 설명",
+                        5000,
+                        10,
+                        ProductStatus.ON_SALE
+                )
+        );
+
+        orderService.createOrder(
+                member.getId(),
+                new OrderCreateRequestDto(
+                        product.getId(),
+                        2,
+                        "신정범",
+                        "010-1111-2222",
+                        "서울시 강남구"
+                )
+        );
+
+        Order savedOrder = orderRepository.findByMember(member).get(0);
+        product.update(
+                "변경된 상품명",
+                product.getPlantType(),
+                product.getCareLevel(),
+                product.getLightRequirement(),
+                product.getWateringCycle(),
+                product.getImageUrl(),
+                product.getPotIncluded(),
+                product.getDescription(),
+                9000,
+                product.getStock(),
+                product.getStatus()
+        );
+
+        entityManager.flush();
+        entityManager.clear();
+
+        Order foundOrder = orderRepository.findById(savedOrder.getId()).orElseThrow();
+        OrderItem foundOrderItem = orderItemRepository.findByOrder(foundOrder).get(0);
+
+        assertThat(foundOrder.getTotalPrice()).isEqualTo(10000);
+        assertThat(foundOrderItem.getProductNameSnapshot()).isEqualTo("주문 당시 상품명");
+        assertThat(foundOrderItem.getOrderPrice()).isEqualTo(5000);
+        assertThat(foundOrderItem.calculateTotalPrice()).isEqualTo(10000);
+        assertThat(foundOrderItem.getProduct().getName()).isEqualTo("변경된 상품명");
+        assertThat(foundOrderItem.getProduct().getPrice()).isEqualTo(9000);
     }
 
     @Test

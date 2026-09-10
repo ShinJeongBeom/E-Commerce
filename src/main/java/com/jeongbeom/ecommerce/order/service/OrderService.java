@@ -19,7 +19,6 @@ import com.jeongbeom.ecommerce.order.entity.OrderStatus;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderItemRepository;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
 import com.jeongbeom.ecommerce.order.exception.OrderAccessDeniedException;
-import com.jeongbeom.ecommerce.order.exception.OrderAlreadyCancelledException;
 import com.jeongbeom.ecommerce.order.exception.OrderNotFoundException;
 import com.jeongbeom.ecommerce.product.entity.Product;
 import com.jeongbeom.ecommerce.product.entity.repository.ProductRepository;
@@ -29,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -56,12 +56,12 @@ public class OrderService {
         product.decreaseStock(orderCreateRequestDto.getQuantity());
 
         //총 주문 금액 계산
-        int totalPrice = product.getPrice() * orderCreateRequestDto.getQuantity();
+        int totalPrice = Math.multiplyExact(product.getPrice(), orderCreateRequestDto.getQuantity());
 
         //주문 생성
         Order order = new Order(
                 member,
-                "ORD-" + System.currentTimeMillis(),
+                createOrderNumber(),
                 totalPrice,
                 OrderStatus.CREATED,
                 orderCreateRequestDto.getName(),
@@ -76,8 +76,7 @@ public class OrderService {
         OrderItem orderItem = new OrderItem(
                 savedOrder,
                 product,
-                orderCreateRequestDto.getQuantity(),
-                product.getPrice()
+                orderCreateRequestDto.getQuantity()
         );
 
         //주문 상품 저장
@@ -88,16 +87,14 @@ public class OrderService {
     @Transactional
     public void cancelOrder(Long memberId, Long orderId){
         // 주문 조회
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(OrderNotFoundException::new);
 
         if(!order.getMember().getId().equals(memberId)){
             throw new OrderAccessDeniedException();
         }
 
-        if (order.getStatus() == OrderStatus.CANCELLED){
-            throw new OrderAlreadyCancelledException();
-        }
+        order.cancel();
 
         // 주문 상품 조회
         List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
@@ -108,9 +105,6 @@ public class OrderService {
                     .orElseThrow(ProductNotFoundException::new);
             product.increaseStock(orderItem.getOrderQuantity());
         }
-
-        // 주문 상태 변경
-        order.changeStatus(OrderStatus.CANCELLED);
 
     }
     //주문한 멤버 Id로 주문 목록 조회
@@ -146,7 +140,7 @@ public class OrderService {
 
         Order order = new Order(
                 member,
-                "ORD-" + System.currentTimeMillis(),
+                createOrderNumber(),
                 0,
                 OrderStatus.CREATED,
                 request.getName(),
@@ -166,15 +160,12 @@ public class OrderService {
 
             product.decreaseStock(cartItem.getQuantity());
 
-            int orderPrice = product.getPrice();
-            totalPrice += orderPrice * cartItem.getQuantity();
-
             OrderItem orderItem = new OrderItem(
                     savedOrder,
                     product,
-                    cartItem.getQuantity(),
-                    orderPrice
+                    cartItem.getQuantity()
             );
+            totalPrice = Math.addExact(totalPrice, orderItem.calculateTotalPrice());
 
             orderItemRepository.save(orderItem);
         }
@@ -242,6 +233,10 @@ public class OrderService {
         }
 
         return firstProductName + " 외 " + otherCount + "건";
+    }
+
+    private String createOrderNumber() {
+        return "ORD-" + UUID.randomUUID();
     }
 
 }

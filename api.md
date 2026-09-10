@@ -230,6 +230,13 @@ S3 업로드 성공 후 `POST /products/images/complete`를 호출한다.
 }
 ```
 
+`POST /orders/{orderId}/cancel`
+
+- 본인의 `CREATED` 주문만 취소할 수 있다.
+- 취소가 완료되면 주문 상태를 `CANCELLED`로 변경하고 주문 수량만큼 재고를 한 번 복구한다.
+- 이미 취소된 주문은 기존 `ORDER_ALREADY_CANCELLED` 오류를 반환한다.
+- 결제 완료 이후 상태는 결제 취소·환불 절차가 필요하므로 `INVALID_ORDER_STATUS_TRANSITION`과 `409 Conflict`를 반환한다.
+
 ### Admin Dashboard
 
 `GET /admin/dashboard`

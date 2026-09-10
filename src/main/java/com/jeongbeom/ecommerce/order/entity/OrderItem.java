@@ -2,6 +2,7 @@ package com.jeongbeom.ecommerce.order.entity;
 
 import com.jeongbeom.ecommerce.common.entity.BaseTimeEntity;
 import com.jeongbeom.ecommerce.product.entity.Product;
+import com.jeongbeom.ecommerce.product.exception.InvalidStockQuantityException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,12 +28,23 @@ public class OrderItem extends BaseTimeEntity {
     private int orderPrice;
 
     @Column(nullable = false)
+    private String productNameSnapshot;
+
+    @Column(nullable = false)
     private int orderQuantity;
 
-    public OrderItem(Order order, Product product, int orderQuantity, int orderPrice) {
+    public OrderItem(Order order, Product product, int orderQuantity) {
+        if (orderQuantity <= 0) {
+            throw new InvalidStockQuantityException();
+        }
         this.order = order;
         this.product = product;
         this.orderQuantity = orderQuantity;
-        this.orderPrice = orderPrice;
+        this.orderPrice = product.getPrice();
+        this.productNameSnapshot = product.getName();
+    }
+
+    public int calculateTotalPrice() {
+        return Math.multiplyExact(orderPrice, orderQuantity);
     }
 }
