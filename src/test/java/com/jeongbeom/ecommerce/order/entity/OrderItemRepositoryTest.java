@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest
 @Transactional
 public class OrderItemRepositoryTest {
@@ -71,8 +73,7 @@ public class OrderItemRepositoryTest {
         OrderItem orderItem = new OrderItem(
                 order,
                 product,
-                1,
-                100000
+                1
         );
 
         // when
@@ -84,10 +85,9 @@ public class OrderItemRepositoryTest {
         OrderItem foundOrderItem = orderItemRepository.findById(savedOrderItem.getId())
                 .orElseThrow();
 
-        //Product 이름, 주문수량, 주문 가격이 잘 나오는지 확인
-        System.out.println(foundOrderItem.getProduct().getName());
-        System.out.println(foundOrderItem.getOrderQuantity());
-        System.out.println(foundOrderItem.getOrderPrice());
+        assertThat(foundOrderItem.getProductNameSnapshot()).isEqualTo("방울복랑금");
+        assertThat(foundOrderItem.getOrderQuantity()).isEqualTo(1);
+        assertThat(foundOrderItem.getOrderPrice()).isEqualTo(5000);
 
 
     }

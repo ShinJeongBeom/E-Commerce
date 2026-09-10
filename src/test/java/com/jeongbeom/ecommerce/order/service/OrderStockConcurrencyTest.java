@@ -4,6 +4,8 @@ import com.jeongbeom.ecommerce.common.entity.Role;
 import com.jeongbeom.ecommerce.member.entity.Member;
 import com.jeongbeom.ecommerce.member.repository.MemberRepository;
 import com.jeongbeom.ecommerce.order.dto.OrderCreateRequestDto;
+import com.jeongbeom.ecommerce.order.entity.Order;
+import com.jeongbeom.ecommerce.order.entity.OrderStatus;
 import com.jeongbeom.ecommerce.order.entity.repository.OrderRepository;
 import com.jeongbeom.ecommerce.product.entity.CareLevel;
 import com.jeongbeom.ecommerce.product.entity.LightRequirement;
@@ -96,6 +98,80 @@ class OrderStockConcurrencyTest {
         assertThat(successCount.get()).isEqualTo(10);
         assertThat(failCount.get()).isEqualTo(10);
         assertThat(foundProduct.getStock()).isEqualTo(0);
-        assertThat(orderRepository.findByMember(member)).hasSize(10);
+        assertThat(orderRepository.findByMember(member))
+                .hasSize(10)
+                .extracting(Order::getOrderNumber)
+                .doesNotHaveDuplicates();
+    }
+
+    @Test
+    @DisplayName("동시에 주문을 취소해도 재고는 한 번만 복구된다")
+    void 동시_주문_취소_재고_복구_테스트() throws InterruptedException {
+        Member member = memberRepository.save(
+                new Member(
+                        "cancel-concurrency" + System.currentTimeMillis() + "@test.com",
+                        "1234",
+                        "010-1111-2222",
+                        Role.USER
+                )
+        );
+
+        Product product = productRepository.save(
+                new Product(
+                        "방울복랑금",
+                        "다육식물",
+                        CareLevel.NORMAL,
+                        LightRequirement.MEDIUM,
+                        WateringCycle.WEEKLY,
+                        "https://example.com/product.jpg",
+                        "화분 포함",
+                        "상품 설명",
+                        5000,
+                        10,
+                        ProductStatus.ON_SALE
+                )
+        );
+
+        orderService.createOrder(
+                member.getId(),
+                new OrderCreateRequestDto(
+                        product.getId(),
+                        2,
+                        "신정범",
+                        "010-1111-2222",
+                        "서울시 강남구"
+                )
+        );
+        Order order = orderRepository.findByMember(member).get(0);
+
+        int threadCount = 2;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger failCount = new AtomicInteger();
+
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    orderService.cancelOrder(member.getId(), order.getId());
+                    successCount.incrementAndGet();
+                } catch (Exception e) {
+                    failCount.incrementAndGet();
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executorService.shutdown();
+
+        Product foundProduct = productRepository.findById(product.getId()).orElseThrow();
+        Order cancelledOrder = orderRepository.findById(order.getId()).orElseThrow();
+
+        assertThat(successCount.get()).isEqualTo(1);
+        assertThat(failCount.get()).isEqualTo(1);
+        assertThat(cancelledOrder.getStatus()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(foundProduct.getStock()).isEqualTo(10);
     }
 }
