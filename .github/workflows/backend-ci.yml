@@ -1,0 +1,78 @@
+name: Backend CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      mysql:
+        image: mysql:8.4.11
+        env:
+          MYSQL_DATABASE: ecommerce_test
+          MYSQL_ROOT_PASSWORD: test-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -ptest-password --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      TEST_DB_URL: jdbc:mysql://127.0.0.1:3306/ecommerce_test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+      TEST_DB_USERNAME: root
+      TEST_DB_PASSWORD: test-password
+      TEST_DDL_AUTO: create-drop
+      TEST_JWT_SECRET: ci-only-jwt-key-not-for-production-0123456789abcdef
+      SPRING_DOCKER_COMPOSE_ENABLED: false
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Java 17
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@4733eaac7c1b0da527e4206b7671e0061de1ce37 # v6
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+
+      - name: Run tests
+        run: ./gradlew clean test --no-daemon
+
+      - name: Build application
+        run: ./gradlew build -x test --no-daemon
+
+      - name: Upload CI results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: backend-ci-results-${{ github.run_id }}
+          path: |
+            build/reports/tests/test
+            build/test-results/test
+            build/libs/*.jar
+          if-no-files-found: warn
+          retention-days: 7
