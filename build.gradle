@@ -7,6 +7,8 @@ ext {
     springAiVersion = "2.0.1"
 }
 
+ext['flyway.version'] = '13.6.0'
+
 group = 'com.jeongbeom'
 version = '0.0.1-SNAPSHOT'
 description = 'E-Commerce'
@@ -48,6 +50,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    //flyway 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
+    runtimeOnly 'org.flywaydb:flyway-mysql'
 
 //  JWT-api
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

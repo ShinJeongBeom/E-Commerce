@@ -39,8 +39,11 @@ out/
 ### ENV ###
 .env
 .env.*
+!.env.prod.example
+
 application-*.yml
 application-*.properties
+!src/main/resources/application-prod.properties
 
 # 테스트 리소스는 기본적으로 제외하되 안전한 설정만 추적
 src/test/resources/*

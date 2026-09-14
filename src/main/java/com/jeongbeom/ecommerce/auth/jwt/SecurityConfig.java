@@ -23,6 +23,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())           //현재 postman 기반 개발이므로 CSRF 끔
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()                //회원가입&로그인 API는 누구나 가능
 
                         .requestMatchers(HttpMethod.GET, "/products/**").permitAll()        // 상품 조회는 누구나 가능
