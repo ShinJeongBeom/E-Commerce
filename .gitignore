@@ -38,6 +38,10 @@ out/
 
 ### ENV ###
 .env
+.env.*
 application-*.yml
 application-*.properties
-src/test/resources/
+
+# 테스트 리소스는 기본적으로 제외하되 안전한 설정만 추적
+src/test/resources/*
+!src/test/resources/application.properties
